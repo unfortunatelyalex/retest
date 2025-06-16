@@ -1,0 +1,752 @@
+import os
+import asyncio
+import httpx
+import requests
+import base64
+import time
+from datetime import datetime, timedelta
+import reflex as rx
+from dotenv import load_dotenv
+from typing import Dict, List, Any, Optional
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
+
+# Get the Reflex app instance for session management
+app = rx.App()
+
+
+class DashboardState(rx.State):
+    # Persist the order of widgets in local storage (comma-separated indices or names).
+    # Provide a default order as fallback if not found in storage.
+    # default widget order (fallback)
+    widget_order: str = rx.LocalStorage("0,1,2")
+    # GitHub activity stats
+    commits_by_month: list = [
+        ("Jan 2025", 42), ("Feb 2025", 30), ("Mar 2025", 51), ("Apr 2025", 22)]
+
+    def move_widget(self, from_index: int, to_index: int) -> None:
+        """Reorder the widgets by moving the item at from_index to to_index."""
+        # If there is no current order (e.g., first load with no local storage value), do nothing.
+        if not self.widget_order:
+            return
+        # Convert the comma-separated string to a list.
+        order_list = self.widget_order.split(",")
+        # Ensure indices are within bounds.
+        if from_index < 0 or from_index >= len(order_list) or to_index < 0 or to_index >= len(order_list):
+            return
+        # Remove the widget from the old position and insert it at the new position.
+        widget = order_list.pop(from_index)
+        order_list.insert(to_index, widget)
+        # Update the stored order as a comma-separated string.
+        self.widget_order = ",".join(order_list)
+
+
+class SpotifyState(rx.State):
+    """App state holding current track info."""
+    # interval for automatic updates (in seconds)
+    update_interval: int = 20
+    current_track: str = ""       # e.g. "Song Title – Artist"
+    current_cover_url: str = ""   # URL of album art image
+    is_fetching: bool = False
+    auto_refresh: bool = False
+    spotify_access_token: str = ""
+    spotify_token_expires_at: int = 0
+    is_playing: bool = False
+    progress_ms: int = 0
+    duration_ms: int = 0
+    song_url: str = ""
+    artist_url: str = ""
+
+    # Pseudo-timer fields for real-time progress updates
+    # Unix timestamp when we last got real data from Spotify
+    last_update_time: float = 0.0
+    is_pseudo_timer_running: bool = False
+    ui_update_trigger: int = 0  # Counter to trigger UI updates
+
+    @rx.var
+    def current_progress_ms(self) -> int:
+        """Calculate current progress including pseudo-timer offset."""
+        # Reference ui_update_trigger to ensure this gets recalculated
+        _ = self.ui_update_trigger
+
+        if not self.is_playing or self.last_update_time == 0:
+            return self.progress_ms
+
+        # Calculate time elapsed since last API update
+        import time
+        current_time = time.time()
+        elapsed_seconds = current_time - self.last_update_time
+        elapsed_ms = int(elapsed_seconds * 1000)
+
+        # Add elapsed time to the last known progress
+        estimated_progress = self.progress_ms + elapsed_ms
+
+        # Don't exceed the track duration
+        if self.duration_ms > 0:
+            estimated_progress = min(estimated_progress, self.duration_ms)
+
+        # Return the last known progress if too much time has passed (failsafe)
+        if elapsed_seconds > 30:  # If more than 30 seconds, something might be wrong
+            return self.progress_ms
+
+        return max(0, estimated_progress)  # Ensure non-negative
+
+    @rx.var
+    def progress_time_formatted(self) -> str:
+        """Format current progress time as MM:SS."""
+        progress = self.current_progress_ms  # Use the computed progress
+        if progress <= 0:
+            return "0:00"
+        total_seconds = progress // 1000
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes}:{seconds:02d}"
+
+    @rx.var
+    def duration_time_formatted(self) -> str:
+        """Format duration time as MM:SS."""
+        if self.duration_ms <= 0:
+            return "0:00"
+        total_seconds = self.duration_ms // 1000
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes}:{seconds:02d}"
+
+    @rx.var
+    def background_image_url(self) -> str:
+        """Get background image URL for the Spotify badge."""
+        if self.current_cover_url and self.current_cover_url != "/placeholder_cover.png":
+            return f"url('{self.current_cover_url}')"
+        return "none"
+
+    async def _get_spotify_access_token_from_refresh(self):
+        client_id = os.getenv("SPOTIFY_CLIENT_ID")
+        client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+        refresh_token = os.getenv("SPOTIFY_REFRESH_TOKEN")
+
+        if not client_id or not client_secret or not refresh_token:
+            print("Error: Spotify credentials not set in environment.")
+            return None
+
+        # Check if we have a valid token
+        current_time = int(time.time())
+        if self.spotify_access_token and current_time < self.spotify_token_expires_at:
+            return self.spotify_access_token, self.spotify_token_expires_at
+
+        # Get new token using refresh token
+        auth_string = f"{client_id}:{client_secret}"
+        auth_bytes = auth_string.encode("utf-8")
+        auth_base64 = base64.b64encode(auth_bytes).decode("utf-8")
+
+        headers = {
+            "Authorization": f"Basic {auth_base64}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
+        }
+
+        try:
+            response = requests.post(
+                "https://accounts.spotify.com/api/token", headers=headers, data=data, timeout=5)
+            response.raise_for_status()
+
+            token_data = response.json()
+            access_token = token_data["access_token"]
+
+            # Set expiration time (subtract 60 seconds for safety)
+            expires_in = token_data.get("expires_in", 3600)
+            expires_at = current_time + expires_in - 60
+
+            # Return the token and expiration time for the caller to update state
+            return access_token, expires_at
+
+        except Exception as e:
+            print(f"Failed to refresh Spotify access token: {e}")
+            return None, None
+
+    @rx.event(background=True)
+    async def start_spotify_updates(self):
+        """Start automatic Spotify updates every 20 seconds (reduced frequency for stability)."""
+        async with self:
+            if self.auto_refresh:
+                return
+            self.auto_refresh = True
+            self.is_pseudo_timer_running = True
+
+        # Start the pseudo-timer for real-time progress updates
+        async def pseudo_timer():
+            while True:
+                try:
+                    async with self:
+                        if not self.is_pseudo_timer_running:
+                            break
+                        # Increment counter to trigger UI updates
+                        self.ui_update_trigger += 1
+                    # Force UI update every second for smooth progress
+                    await asyncio.sleep(1)
+                except Exception as e:
+                    print(f"Pseudo timer error: {e}")
+                    await asyncio.sleep(1)
+                    continue
+
+        # Start both timers concurrently
+        await asyncio.gather(
+            self._spotify_api_loop(),
+            pseudo_timer(),
+            return_exceptions=True
+        )
+
+    async def _spotify_api_loop(self):
+        """Main Spotify API update loop."""
+        while True:
+            try:
+                async with self:
+                    if not self.auto_refresh:
+                        break
+
+                # Fetch current track without blocking UI
+                await self._fetch_track_background()
+                await asyncio.sleep(self.update_interval)
+            except Exception as e:
+                # Handle any unexpected errors in the background loop
+                print(f"Background update error: {e}")
+                await asyncio.sleep(self.update_interval)
+                continue
+
+    @rx.event
+    def stop_spotify_updates(self):
+        """Stop automatic Spotify updates."""
+        self.auto_refresh = False
+        self.is_pseudo_timer_running = False
+
+    async def _fetch_track_background(self):
+        """Background track fetching using Spotify API with refresh token."""
+        import time
+
+        try:
+            token_result = await self._get_spotify_access_token_from_refresh()
+            if not token_result or token_result[0] is None:
+                return
+
+            access_token, expires_at = token_result
+
+            # Update state with new token within async context
+            async with self:
+                self.spotify_access_token = access_token
+                if isinstance(expires_at, int):
+                    self.spotify_token_expires_at = expires_at
+
+            headers = {
+                "Authorization": f"Bearer {access_token}"
+            }
+
+            # Get currently playing track
+            response = requests.get(
+                "https://api.spotify.com/v1/me/player/currently-playing",
+                headers=headers,
+                timeout=5
+            )
+
+            # Record the time when we got fresh data
+            current_time = time.time()
+
+            if response.status_code == 204:
+                # No track currently playing
+                try:
+                    async with self:
+                        self.current_track = "Currently Not Playing"
+                        self.current_cover_url = "/placeholder_cover.png"
+                        self.is_playing = False
+                        self.progress_ms = 0
+                        self.duration_ms = 0
+                        self.song_url = ""
+                        self.artist_url = ""
+                        self.last_update_time = current_time
+                except:
+                    # Silently handle client disconnection
+                    pass
+                return
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("item"):
+                try:
+                    async with self:
+                        self.current_track = "No track data"
+                        self.current_cover_url = "/placeholder_cover.png"
+                        self.is_playing = False
+                        self.progress_ms = 0
+                        self.duration_ms = 0
+                        self.song_url = ""
+                        self.artist_url = ""
+                        self.last_update_time = current_time
+                except:
+                    # Silently handle client disconnection
+                    pass
+                return
+
+            # Extract track information
+            track = data["item"]
+            track_name = track.get("name", "")
+            artists = track.get("artists", [])
+            artist_names = [artist.get("name", "") for artist in artists]
+            artist_string = ", ".join(artist_names) if artist_names else ""
+
+            if track_name and artist_string:
+                track_display = f"{track_name} – {artist_string}"
+            else:
+                track_display = track_name or artist_string
+
+            # Get album cover (largest image)
+            cover_url = "/placeholder_cover.png"
+            images = track.get("album", {}).get("images", [])
+            if images:
+                cover_url = images[0].get("url", "/placeholder_cover.png")
+
+            # Get additional data
+            is_playing = data.get("is_playing", False)
+            progress_ms = data.get("progress_ms", 0)
+            duration_ms = track.get("duration_ms", 0)
+            song_url = track.get("external_urls", {}).get("spotify", "")
+            artist_url = ""
+            if artists:
+                artist_url = artists[0].get(
+                    "external_urls", {}).get("spotify", "")
+
+            # Update state with better error handling for disconnected clients
+            try:
+                async with self:
+                    self.current_track = track_display if track_display else "Unknown Track"
+                    self.current_cover_url = cover_url
+                    self.is_playing = is_playing
+                    self.progress_ms = progress_ms
+                    self.duration_ms = duration_ms
+                    self.song_url = song_url
+                    self.artist_url = artist_url
+                    self.last_update_time = current_time  # Record when we got this data
+            except:
+                # Silently handle client disconnection during state updates
+                pass
+
+        except requests.exceptions.RequestException as e:
+            if hasattr(e, 'response') and e.response is not None and e.response.status_code == 401:
+                # Token might be expired, clear it to force refresh
+                try:
+                    async with self:
+                        self.spotify_access_token = ""
+                        self.spotify_token_expires_at = 0
+                except:
+                    pass  # Silently handle if client disconnected
+            # Silently handle request exceptions in background to reduce noise
+        except Exception as e:
+            # Silently handle other errors to reduce noise in development
+            pass
+
+    @rx.event
+    async def fetch_current_track(self):
+        """Manual refresh of current track using Spotify API with refresh token."""
+        import time
+
+        if self.is_fetching:
+            return
+
+        self.is_fetching = True
+
+        token_result = await self._get_spotify_access_token_from_refresh()
+        if not token_result or token_result[0] is None:
+            self.is_fetching = False
+            return
+
+        access_token, expires_at = token_result
+
+        # Update state with new token
+        self.spotify_access_token = access_token
+        if isinstance(expires_at, int):
+            self.spotify_token_expires_at = expires_at
+
+        headers = {
+            "Authorization": f"Bearer {access_token}"
+        }
+
+        try:
+            # Get currently playing track
+            response = requests.get(
+                "https://api.spotify.com/v1/me/player/currently-playing",
+                headers=headers,
+                timeout=5
+            )
+
+            # Record the time when we got fresh data
+            current_time = time.time()
+
+            if response.status_code == 204:
+                # No track currently playing
+                self.current_track = "Currently Not Playing"
+                self.current_cover_url = "/placeholder_cover.png"
+                self.is_playing = False
+                self.progress_ms = 0
+                self.duration_ms = 0
+                self.song_url = ""
+                self.artist_url = ""
+                self.last_update_time = current_time
+                self.is_fetching = False
+                return
+
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get("item"):
+                self.current_track = "No track data"
+                self.current_cover_url = "/placeholder_cover.png"
+                self.is_playing = False
+                self.progress_ms = 0
+                self.duration_ms = 0
+                self.song_url = ""
+                self.artist_url = ""
+                self.last_update_time = current_time
+                self.is_fetching = False
+                return
+
+            # Extract track information
+            track = data["item"]
+            track_name = track.get("name", "")
+            artists = track.get("artists", [])
+            artist_names = [artist.get("name", "") for artist in artists]
+            artist_string = ", ".join(artist_names) if artist_names else ""
+
+            if track_name and artist_string:
+                track_display = f"{track_name} – {artist_string}"
+            else:
+                track_display = track_name or artist_string
+
+            # Get album cover (largest image)
+            cover_url = "/placeholder_cover.png"
+            images = track.get("album", {}).get("images", [])
+            if images:
+                cover_url = images[0].get("url", "/placeholder_cover.png")
+
+            # Get additional data
+            is_playing = data.get("is_playing", False)
+            progress_ms = data.get("progress_ms", 0)
+            duration_ms = track.get("duration_ms", 0)
+            song_url = track.get("external_urls", {}).get("spotify", "")
+            artist_url = ""
+            if artists:
+                artist_url = artists[0].get(
+                    "external_urls", {}).get("spotify", "")
+
+            self.current_track = track_display if track_display else "Unknown Track"
+            self.current_cover_url = cover_url
+            self.is_playing = is_playing
+            self.progress_ms = progress_ms
+            self.duration_ms = duration_ms
+            self.song_url = song_url
+            self.artist_url = artist_url
+            self.last_update_time = current_time  # Record when we got this data
+
+        except requests.exceptions.RequestException as e:
+            if hasattr(e, 'response') and e.response is not None and e.response.status_code == 401:
+                # Token might be expired, clear it to force refresh
+                self.spotify_access_token = ""
+                self.spotify_token_expires_at = 0
+                print(
+                    "Spotify access token expired or invalid, will refresh on next call")
+            else:
+                print(f"Failed to fetch data from Spotify: {e}")
+        except Exception as e:
+            print(f"Unexpected error fetching Spotify data: {e}")
+
+        self.is_fetching = False
+
+
+class GitHubState(rx.State):
+    """State for managing GitHub contribution data."""
+
+    # GitHub data
+    github_token: str = ""
+    github_username: str = "unfortunatelyalex"  # default username
+    total_contributions: int = 0
+    avatar_url: str = ""
+    error_message: str = ""
+    is_loading: bool = False
+    chart_ready: bool = False  # For rx.skeleton - True when chart is ready to display
+
+    # Contribution data for the chart
+    contribution_weeks: List[List[Dict[str, Any]]] = []
+    months: List[Dict[str, Any]] = []
+    current_year: int = datetime.now().year
+
+    @rx.event
+    async def fetch_github_contributions(self, username: Optional[str] = None):
+        """Fetch GitHub contribution data using GraphQL API."""
+        if self.is_loading:
+            return
+
+        self.is_loading = True
+        self.chart_ready = False  # Chart is not ready while loading
+        self.error_message = ""
+
+        # Use provided username or default
+        if username:
+            self.github_username = username
+        elif not self.github_username:
+            self.github_username = "unfortunatelyalex"
+
+        # Get token from environment
+        token = os.getenv("GITHUB_TOKEN")
+        if not token:
+            self.error_message = "GitHub token not found in environment variables"
+            self.is_loading = False
+            self.chart_ready = False  # Chart not ready due to error
+            return
+
+        # Calculate date range for past year
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=365)
+
+        # GraphQL query for contribution data
+        query = """
+        query($username: String!, $from: DateTime!, $to: DateTime!) {
+          user(login: $username) {
+            contributionsCollection(from: $from, to: $to) {
+              totalCommitContributions
+              contributionCalendar {
+                totalContributions
+                weeks {
+                  contributionDays {
+                    contributionCount
+                    date
+                    color
+                    contributionLevel
+                  }
+                }
+              }
+            }
+            avatarUrl
+          }
+        }
+        """
+
+        variables = {
+            "username": self.github_username,
+            "from": start_date.isoformat(),
+            "to": end_date.isoformat()
+        }
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.post(
+                "https://api.github.com/graphql",
+                json={"query": query, "variables": variables},
+                headers=headers,
+                timeout=10
+            )
+            response.raise_for_status()
+
+            data = response.json()
+
+            if "errors" in data:
+                self.error_message = f"GitHub API error: {data['errors'][0]['message']}"
+                self.is_loading = False
+                self.chart_ready = False  # Chart not ready due to error
+                return
+
+            user_data = data.get("data", {}).get("user")
+            if not user_data:
+                self.error_message = f"User '{self.github_username}' not found"
+                self.is_loading = False
+                self.chart_ready = False  # Chart not ready due to error
+                return
+
+            # Extract contribution data
+            contributions = user_data["contributionsCollection"]
+            calendar = contributions["contributionCalendar"]
+
+            self.total_contributions = calendar["totalContributions"]
+            self.avatar_url = user_data["avatarUrl"]
+
+            # Process weeks data for the chart
+            self.contribution_weeks = []
+            for week in calendar["weeks"]:
+                week_data = []
+                for day in week["contributionDays"]:
+                    week_data.append({
+                        "date": day["date"],
+                        "count": day["contributionCount"],
+                        "level": self._get_contribution_level(day["contributionCount"]),
+                        # Keep original API level for reference
+                        "api_level": day["contributionLevel"]
+                    })
+                self.contribution_weeks.append(week_data)
+
+            # Generate month labels
+            self._generate_month_labels()
+
+            # Chart is now ready to display
+            self.chart_ready = True
+
+        except requests.exceptions.RequestException as e:
+            self.error_message = f"Failed to fetch GitHub data: {str(e)}"
+            self.chart_ready = False  # Chart not ready due to error
+        except Exception as e:
+            self.error_message = f"Unexpected error: {str(e)}"
+            self.chart_ready = False  # Chart not ready due to error
+
+        self.is_loading = False
+
+    def _get_contribution_level(self, count: int) -> int:
+        """Get contribution level based on count (0-4)."""
+        if count == 0:
+            return 0  # No contributions
+        elif count <= 3:
+            return 1  # Low contributions
+        elif count <= 6:
+            return 2  # Medium contributions
+        elif count <= 9:
+            return 3  # High contributions
+        else:
+            return 4  # Very high contributions
+
+    def _generate_month_labels(self):
+        """Generate month labels for the chart showing the last 13 months
+           (e.g., from July last year to July this year, inclusive)."""
+        self.months = []
+
+        current_date = datetime.now()
+
+        # This is the reference start date for the 365-day contribution data window.
+        # Week indices for month labels are calculated relative to this date.
+        data_period_start_ref_date = current_date - timedelta(days=365)
+
+        # Determine the first month for the labels:
+        # This will be the month of (current_date - 1 year), set to the 1st day.
+        # e.g., if current_date is July 15, 2024, month_iterator_start_date is July 1, 2023.
+        month_iterator_start_date = current_date.replace(
+            day=1, year=current_date.year - 1)
+
+        # Determine the last month for the labels:
+        # This will be the current month, set to the 1st day.
+        # e.g., if current_date is July 15, 2024, month_iterator_end_date is July 1, 2024.
+        month_iterator_end_date = current_date.replace(day=1)
+
+        month_iterator_dt = month_iterator_start_date
+
+        # Using months_seen to prevent duplicates, though the loop logic should be precise.
+        months_seen = set()
+
+        while month_iterator_dt <= month_iterator_end_date:
+            month_key = month_iterator_dt.strftime("%b %Y")  # e.g., "Jul 2023"
+
+            if month_key not in months_seen:
+                # Calculate the approximate week index for this month's label.
+                # This is the number of weeks from data_period_start_ref_date to the current month_iterator_dt.
+                # month_iterator_dt is already the 1st of the month.
+                days_offset = (month_iterator_dt -
+                               data_period_start_ref_date).days
+                week_index = max(0, days_offset // 7)
+
+                self.months.append({
+                    "name": month_iterator_dt.strftime("%b"),  # e.g., "Jul"
+                    "week_index": week_index
+                })
+                months_seen.add(month_key)
+
+            # Advance to the first day of the next month
+            if month_iterator_dt.month == 12:
+                month_iterator_dt = month_iterator_dt.replace(
+                    year=month_iterator_dt.year + 1, month=1)
+            else:
+                month_iterator_dt = month_iterator_dt.replace(
+                    month=month_iterator_dt.month + 1)
+
+        # This loop structure is designed to produce exactly 13 month labels
+        # (e.g., from July 1, 2023, to July 1, 2024, inclusive).
+        # The previous logic to trim self.months to a fixed size is no longer needed.
+
+    @rx.event
+    def set_username(self, username: str):
+        """Set the GitHub username."""
+        self.github_username = username
+
+
+class TooltipState(rx.State):
+    """State for managing tooltips."""
+
+    open_day: str | None = None  # Whether the tooltip is currently open
+
+    @rx.event
+    def open_tooltip(self, day_date: str):
+        self.open_day = day_date
+
+    @rx.event
+    def close_tooltip(self, value: bool, day_date: str):
+        if not value and self.open_day == day_date:
+            self.open_day = None
+
+    @rx.event
+    def close_tt_for_day(self, day_date: str):
+        """Close tooltip for a specific day."""
+        if self.open_day == day_date:
+            self.open_day = None
+
+
+class DiscordAvatarState(rx.State):
+    """State for managing Discord avatar fetching"""
+    avatar_url: str = "/profile.jpg"  # Fallback avatar
+    user_id: str = "399668151475765258"
+    guild_id: str = "791670762859266078"
+
+    @rx.event
+    async def fetch_discord_avatar(self):
+        """Fetch Discord avatar URL from Discord API using bot token"""
+        try:
+            # Get Discord bot token from environment
+            discord_token = os.getenv("DC_TOKEN")
+            if not discord_token:
+                print("DC_TOKEN environment variable not found")
+                return
+
+            headers = {
+                "Authorization": f"Bot {discord_token}",
+                "Content-Type": "application/json"
+            }
+
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"https://discord.com/api/v10/guilds/{self.guild_id}/members/{self.user_id}",
+                    headers=headers
+                )
+
+                if response.status_code == 200:
+                    user_data = response.json()
+                    avatar_hash = user_data.get("avatar")
+
+                    if avatar_hash:
+                        # Construct the full avatar URL
+                        # https://cdn.discordapp.com/guilds/791670762859266078/users/399668151475765258/avatars/d2ddc931f4e03058643a607ffcb692a9.png?size=4096
+                        self.avatar_url = f"https://cdn.discordapp.com/guilds/{self.guild_id}/users/{self.user_id}/avatars/{avatar_hash}.png?size=4096"
+                    else:
+                        # User has no custom avatar, use default
+                        discriminator = user_data.get("discriminator", "0")
+                        if discriminator == "0":  # New username system
+                            default_avatar_index = (
+                                int(self.user_id) >> 22) % 6
+                        else:  # Legacy discriminator system
+                            default_avatar_index = int(discriminator) % 5
+                        self.avatar_url = f"https://cdn.discordapp.com/embed/avatars/{default_avatar_index}.png"
+                else:
+                    print(
+                        f"Discord API error: {response.status_code} - {response.text}")
+
+        except Exception as e:
+            print(f"Error fetching Discord avatar: {e}")
+            # Keep fallback avatar on error

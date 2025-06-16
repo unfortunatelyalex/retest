@@ -1,0 +1,13 @@
+.web
+*.db
+.states
+assets/external/
+__pycache__/
+*.py[cod]
+.venv
+.utils/
+.vscode
+.git
+.env
+requirements.txt
+*/blog_posts/*
