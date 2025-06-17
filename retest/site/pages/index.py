@@ -238,11 +238,6 @@ def dashboard_card(component: rx.Component, **kwargs) -> rx.Component:
     )
 
 
-@rx.page(
-    route="/",
-    title="Home",
-    on_load=[SpotifyState.start_spotify_updates, ClockState.start_clock],
-)
 def index():
     return rx.box(
         # Main container with viewport dimensions and margins

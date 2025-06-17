@@ -18,12 +18,12 @@ custom_theme = rx.theme(
 )
 
 app = rx.App(theme=custom_theme)  # Apply the custom theme
+
 app.add_page(
     index,
     route="/",
     title="Home",
     on_load=[SpotifyState.start_spotify_updates, ClockState.start_clock],
-)  # Comment out the index page since
-app.add_page(blog, route="/blog", title="Blog")  # Blog index
-# Dynamic blog post page
+)
+app.add_page(blog, route="/blog", title="Blog")
 app.add_page(blog_post, route="/blog/[slug]", title="Post")

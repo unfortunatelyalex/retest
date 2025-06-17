@@ -11,39 +11,9 @@ import reflex as rx
 from dotenv import load_dotenv
 from typing import Dict, List, Any, Optional
 
-# Load environment variables from .env file
 load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
 
-# Get the Reflex app instance for session management
 app = rx.App()
-
-
-class DashboardState(rx.State):
-    # Persist the order of widgets in local storage (comma-separated indices or names).
-    # Provide a default order as fallback if not found in storage.
-    # default widget order (fallback)
-    widget_order: str = rx.LocalStorage("0,1,2")
-
-    def move_widget(self, from_index: int, to_index: int) -> None:
-        """Reorder the widgets by moving the item at from_index to to_index."""
-        # If there is no current order (e.g., first load with no local storage value), do nothing.
-        if not self.widget_order:
-            return
-        # Convert the comma-separated string to a list.
-        order_list = self.widget_order.split(",")
-        # Ensure indices are within bounds.
-        if (
-            from_index < 0
-            or from_index >= len(order_list)
-            or to_index < 0
-            or to_index >= len(order_list)
-        ):
-            return
-        # Remove the widget from the old position and insert it at the new position.
-        widget = order_list.pop(from_index)
-        order_list.insert(to_index, widget)
-        # Update the stored order as a comma-separated string.
-        self.widget_order = ",".join(order_list)
 
 
 class SpotifyState(rx.State):
@@ -77,9 +47,6 @@ class SpotifyState(rx.State):
 
         if not self.is_playing or self.last_update_time == 0:
             return self.progress_ms
-
-        # Calculate time elapsed since last API update
-        import time
 
         current_time = time.time()
         elapsed_seconds = current_time - self.last_update_time
@@ -273,7 +240,6 @@ class SpotifyState(rx.State):
                         self.artist_url = ""
                         self.last_update_time = current_time
                 except:
-                    # Silently handle client disconnection
                     pass
                 return
 
@@ -292,7 +258,6 @@ class SpotifyState(rx.State):
                         self.artist_url = ""
                         self.last_update_time = current_time
                 except:
-                    # Silently handle client disconnection
                     pass
                 return
 
@@ -323,7 +288,7 @@ class SpotifyState(rx.State):
             if artists:
                 artist_url = artists[0].get("external_urls", {}).get("spotify", "")
 
-            # Update state with better error handling for disconnected clients
+            # Update state with better error handling
             try:
                 async with self:
                     self.current_track = (
@@ -337,7 +302,6 @@ class SpotifyState(rx.State):
                     self.artist_url = artist_url
                     self.last_update_time = current_time  # Record when we got this data
             except:
-                # Silently handle client disconnection during state updates
                 pass
 
         except requests.exceptions.RequestException as e:
@@ -346,16 +310,15 @@ class SpotifyState(rx.State):
                 and e.response is not None
                 and e.response.status_code == 401
             ):
-                # Token might be expired, clear it to force refresh
+                # Spotify Token might be expired, clear it to force refresh
                 try:
                     async with self:
                         self.spotify_access_token = ""
                         self.spotify_token_expires_at = 0
                 except:
-                    pass  # Silently handle if client disconnected
-            # Silently handle request exceptions in background to reduce noise
+                    pass
+
         except Exception as e:
-            # Silently handle other errors to reduce noise in development
             pass
 
     @rx.event
