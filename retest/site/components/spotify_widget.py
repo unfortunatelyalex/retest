@@ -1,37 +1,15 @@
 # site/components/spotify_widget.py
 import reflex as rx
-from retest.site.state import SpotifyState  # assume our state has Spotify info
-from retest.site.components.progress_bar import music_visualizer
-
-app = rx.App()
-
-
-class SpotifyBadgeState(rx.State):
-    """State for managing the Spotify badge visibility."""
-    is_expanded: bool = False
-
-    @rx.event
-    def toggle_badge(self):
-        """Toggle the badge expansion."""
-        self.is_expanded = not self.is_expanded
-
-    @rx.event
-    def collapse_badge(self):
-        """Collapse the badge."""
-        self.is_expanded = False
-
-    @rx.event
-    def expand_badge(self):
-        """Expand the badge."""
-        self.is_expanded = True
+from retest.site.state import SpotifyState, SpotifyBadgeState
 
 
 def spotify_collapsed_badge() -> rx.Component:
     """Collapsed state of the Spotify badge - just a small music icon."""
     return rx.box(
         rx.cond(
-            (SpotifyState.current_track != "") & (SpotifyState.current_track !=
-                                                  "Currently Not Playing") & (SpotifyState.current_track != "No track data"),
+            (SpotifyState.current_track != "")
+            & (SpotifyState.current_track != "Currently Not Playing")
+            & (SpotifyState.current_track != "No track data"),
             # Has music - show play/pause indicator
             rx.box(
                 rx.cond(
@@ -43,22 +21,22 @@ def spotify_collapsed_badge() -> rx.Component:
                             height="6px",
                             background_color=rx.color("green", 9),
                             border_radius="full",
-                            style={"animation": "blink 1.5s infinite"}
+                            style={"animation": "blink 1.5s infinite"},
                         ),
                         align_items="center",
-                        spacing="2"
+                        spacing="2",
                     ),
-                    rx.icon("music", size=20, color_scheme="gray")
+                    rx.icon("music", size=20, color_scheme="gray"),
                 ),
                 padding="12px",
-                cursor="pointer"
+                cursor="pointer",
             ),
             # No music - just music icon
             rx.box(
                 rx.icon("music", size=20, color_scheme="gray"),
                 padding="12px",
-                cursor="pointer"
-            )
+                cursor="pointer",
+            ),
         ),
         on_click=SpotifyBadgeState.expand_badge,
         background_color=rx.color("gray", 2),
@@ -70,10 +48,10 @@ def spotify_collapsed_badge() -> rx.Component:
             "backdrop_filter": "blur(10px)",
             "_hover": {
                 "transform": "scale(1.05)",
-                "box_shadow": "0 6px 20px rgba(0,0,0,0.2)"
+                "box_shadow": "0 6px 20px rgba(0,0,0,0.2)",
             },
-            "transition": "all 0.2s ease"
-        }
+            "transition": "all 0.2s ease",
+        },
     )
 
 
@@ -82,8 +60,10 @@ def spotify_expanded_badge() -> rx.Component:
     return rx.card(
         # Background overlay with blurred album cover
         rx.cond(
-            (SpotifyState.current_cover_url != "/placeholder_cover.png") & (SpotifyState.current_track != "") & (
-                SpotifyState.current_track != "Currently Not Playing") & (SpotifyState.current_track != "No track data"),
+            (SpotifyState.current_cover_url != "/placeholder_cover.png")
+            & (SpotifyState.current_track != "")
+            & (SpotifyState.current_track != "Currently Not Playing")
+            & (SpotifyState.current_track != "No track data"),
             rx.box(
                 position="absolute",
                 top="0",
@@ -96,11 +76,10 @@ def spotify_expanded_badge() -> rx.Component:
                     "background_position": "center",
                     "filter": "blur(15px)",
                     "opacity": "0.2",
-                    "z_index": "0"
-                }
-            )
+                    "z_index": "0",
+                },
+            ),
         ),
-
         # Main content with higher z-index
         rx.box(
             rx.vstack(
@@ -116,15 +95,15 @@ def spotify_expanded_badge() -> rx.Component:
                                 on_click=SpotifyState.stop_spotify_updates,
                                 variant="ghost",
                                 size="1",
-                                aria_label="Stop auto-refresh"
+                                aria_label="Stop auto-refresh",
                             ),
                             rx.icon_button(
                                 rx.icon("play", size=14),
                                 on_click=SpotifyState.start_spotify_updates,
                                 variant="ghost",
                                 size="1",
-                                aria_label="Start auto-refresh"
-                            )
+                                aria_label="Start auto-refresh",
+                            ),
                         ),
                         rx.icon_button(
                             rx.icon("refresh-cw", size=14),
@@ -133,32 +112,37 @@ def spotify_expanded_badge() -> rx.Component:
                             size="1",
                             aria_label="Refresh",
                             style={
-                                "_hover": {"transform": "rotate(180deg)", "transition": "transform 0.3s ease"}
-                            }
+                                "_hover": {
+                                    "transform": "rotate(180deg)",
+                                    "transition": "transform 0.3s ease",
+                                }
+                            },
                         ),
                         rx.icon_button(
                             rx.icon("x", size=14),
                             on_click=SpotifyBadgeState.collapse_badge,
                             variant="ghost",
                             size="1",
-                            aria_label="Collapse"
+                            aria_label="Collapse",
                         ),
-                        spacing="1"
+                        spacing="1",
                     ),
                     align_items="center",
                     width="100%",
-                    margin_bottom="0.5rem"
-                ),                # Main content area
+                    margin_bottom="0.5rem",
+                ),  # Main content area
                 rx.cond(
-                    (SpotifyState.current_track != "") & (SpotifyState.current_track !=
-                                                          "Currently Not Playing") & (SpotifyState.current_track != "No track data"),
+                    (SpotifyState.current_track != "")
+                    & (SpotifyState.current_track != "Currently Not Playing")
+                    & (SpotifyState.current_track != "No track data"),
                     # Currently playing - compact layout for badge
                     rx.vstack(
                         # Album cover and track info in horizontal layout
                         rx.hstack(
                             # Album cover
                             rx.cond(
-                                SpotifyState.current_cover_url != "/placeholder_cover.png",
+                                SpotifyState.current_cover_url
+                                != "/placeholder_cover.png",
                                 rx.cond(
                                     SpotifyState.song_url != "",
                                     rx.link(
@@ -169,11 +153,15 @@ def spotify_expanded_badge() -> rx.Component:
                                             border_radius="md",
                                             style={
                                                 "box_shadow": "0 4px 12px rgba(0,0,0,0.2)",
-                                                "animation": rx.cond(SpotifyState.is_playing, "pulse 2s infinite", "none")
-                                            }
+                                                "animation": rx.cond(
+                                                    SpotifyState.is_playing,
+                                                    "pulse 2s infinite",
+                                                    "none",
+                                                ),
+                                            },
                                         ),
                                         href=SpotifyState.song_url,
-                                        is_external=True
+                                        is_external=True,
                                     ),
                                     rx.image(
                                         src=SpotifyState.current_cover_url,
@@ -182,9 +170,13 @@ def spotify_expanded_badge() -> rx.Component:
                                         border_radius="md",
                                         style={
                                             "box_shadow": "0 4px 12px rgba(0,0,0,0.2)",
-                                            "animation": rx.cond(SpotifyState.is_playing, "pulse 2s infinite", "none")
-                                        }
-                                    )
+                                            "animation": rx.cond(
+                                                SpotifyState.is_playing,
+                                                "pulse 2s infinite",
+                                                "none",
+                                            ),
+                                        },
+                                    ),
                                 ),
                                 rx.box(
                                     rx.icon("music", size=30),
@@ -194,10 +186,9 @@ def spotify_expanded_badge() -> rx.Component:
                                     align_items="center",
                                     justify_content="center",
                                     background_color=rx.color("gray", 3),
-                                    border_radius="md"
-                                )
+                                    border_radius="md",
+                                ),
                             ),
-
                             # Track information
                             rx.vstack(
                                 rx.cond(
@@ -216,8 +207,8 @@ def spotify_expanded_badge() -> rx.Component:
                                             "max_width": "200px",
                                             "white_space": "nowrap",
                                             "overflow": "hidden",
-                                            "text_overflow": "ellipsis"
-                                        }
+                                            "text_overflow": "ellipsis",
+                                        },
                                     ),
                                     rx.text(
                                         SpotifyState.current_track,
@@ -229,11 +220,10 @@ def spotify_expanded_badge() -> rx.Component:
                                             "max_width": "200px",
                                             "white_space": "nowrap",
                                             "overflow": "hidden",
-                                            "text_overflow": "ellipsis"
-                                        }
-                                    )
+                                            "text_overflow": "ellipsis",
+                                        },
+                                    ),
                                 ),
-
                                 # Play status and time
                                 rx.hstack(
                                     rx.cond(
@@ -242,48 +232,48 @@ def spotify_expanded_badge() -> rx.Component:
                                             rx.box(
                                                 width="6px",
                                                 height="6px",
-                                                background_color=rx.color(
-                                                    "green", 9),
+                                                background_color=rx.color("green", 9),
                                                 border_radius="full",
                                                 style={
-                                                    "animation": "blink 1.5s infinite"}
+                                                    "animation": "blink 1.5s infinite"
+                                                },
                                             ),
-                                            rx.text("Playing", size="1",
-                                                    color_scheme="green"),
+                                            rx.text(
+                                                "Playing",
+                                                size="1",
+                                                color_scheme="green",
+                                            ),
                                             align_items="center",
-                                            spacing="2"
+                                            spacing="2",
                                         ),
                                         rx.hstack(
-                                            rx.icon("pause", size=12,
-                                                    color_scheme="gray"),
-                                            rx.text("Paused", size="1",
-                                                    color_scheme="gray"),
+                                            rx.icon(
+                                                "pause", size=12, color_scheme="gray"
+                                            ),
+                                            rx.text(
+                                                "Paused", size="1", color_scheme="gray"
+                                            ),
                                             align_items="center",
-                                            spacing="1"
-                                        )
+                                            spacing="1",
+                                        ),
                                     ),
                                     rx.text(
                                         f"{SpotifyState.progress_time_formatted} / {SpotifyState.duration_time_formatted}",
                                         size="1",
                                         color_scheme="gray",
-                                        style={
-                                            "font_variant_numeric": "tabular-nums"
-                                        }
+                                        style={"font_variant_numeric": "tabular-nums"},
                                     ),
                                     spacing="3",
-                                    align_items="center"
+                                    align_items="center",
                                 ),
-
                                 align_items="start",
                                 spacing="1",
-                                flex="1"
+                                flex="1",
                             ),
-
                             align_items="center",
                             spacing="3",
-                            width="100%"
+                            width="100%",
                         ),
-
                         # Progress bar
                         rx.cond(
                             SpotifyState.duration_ms > 0,
@@ -295,31 +285,29 @@ def spotify_expanded_badge() -> rx.Component:
                                     border_radius="full",
                                     style={
                                         "transition": "width 0.1s ease-out"  # Faster transition for smoother updates
-                                    }
+                                    },
                                 ),
                                 width="100%",
                                 height="3px",
                                 background_color=rx.color("gray", 4),
                                 border_radius="full",
                                 overflow="hidden",
-                                margin_top="0.5rem"
-                            )
+                                margin_top="0.5rem",
+                            ),
                         ),
                         align_items="start",
                         spacing="2",
-                        width="100%"
+                        width="100%",
                     ),
-
                     # Not listening state - compact
                     rx.vstack(
                         rx.center(
                             rx.box(
                                 rx.cond(
-                                    SpotifyState.current_track == "Currently Not Playing",
-                                    rx.icon("pause", size=32,
-                                            color_scheme="gray"),
-                                    rx.icon("music", size=32,
-                                            color_scheme="gray")
+                                    SpotifyState.current_track
+                                    == "Currently Not Playing",
+                                    rx.icon("pause", size=32, color_scheme="gray"),
+                                    rx.icon("music", size=32, color_scheme="gray"),
                                 ),
                                 width="60px",
                                 height="60px",
@@ -327,40 +315,46 @@ def spotify_expanded_badge() -> rx.Component:
                                 align_items="center",
                                 justify_content="center",
                                 background_color=rx.color("gray", 2),
-                                border_radius="md"
+                                border_radius="md",
                             )
                         ),
                         rx.vstack(
                             rx.cond(
                                 SpotifyState.current_track == "Currently Not Playing",
-                                rx.text("Not playing", size="3",
-                                        weight="medium", color_scheme="gray"),
-                                rx.text("No track data", size="3",
-                                        weight="medium", color_scheme="gray")
+                                rx.text(
+                                    "Not playing",
+                                    size="3",
+                                    weight="medium",
+                                    color_scheme="gray",
+                                ),
+                                rx.text(
+                                    "No track data",
+                                    size="3",
+                                    weight="medium",
+                                    color_scheme="gray",
+                                ),
                             ),
                             rx.text(
                                 "Spotify integration",
                                 size="1",
                                 color_scheme="gray",
-                                text_align="center"
+                                text_align="center",
                             ),
                             align_items="center",
-                            spacing="1"
+                            spacing="1",
                         ),
                         align_items="center",
                         spacing="2",
-                        width="100%"
-                    )
+                        width="100%",
+                    ),
                 ),
-
                 spacing="0",
-                width="100%"
+                width="100%",
             ),
             position="relative",
             z_index="1",
-            width="100%"
+            width="100%",
         ),
-
         style={
             "background": rx.color("gray", 1),
             "box_shadow": "0 4px 16px rgba(0,0,0,0.15)",
@@ -368,10 +362,10 @@ def spotify_expanded_badge() -> rx.Component:
             "border_color": rx.color("gray", 4),
             "backdrop_filter": "blur(10px)",
             "position": "relative",
-            "overflow": "hidden"
+            "overflow": "hidden",
         },
         size="2",
-        width="320px"
+        width="320px",
     )
 
 
@@ -384,36 +378,30 @@ def SpotifyWidget():
                 rx.cond(
                     SpotifyBadgeState.is_expanded,
                     spotify_expanded_badge(),
-                    spotify_collapsed_badge()
+                    spotify_collapsed_badge(),
                 ),
                 position="fixed",
                 bottom="20px",
                 right="20px",
                 z_index="1000",
-                style={
-                    "transition": "all 0.3s ease-in-out"
-                }
+                style={"transition": "all 0.3s ease-in-out"},
             )
         ),
-
         # Mobile version - Drawer from right side
         rx.mobile_and_tablet(
             rx.box(
                 rx.cond(
                     SpotifyBadgeState.is_expanded,
                     spotify_expanded_badge(),
-                    spotify_collapsed_badge()
+                    spotify_collapsed_badge(),
                 ),
                 position="fixed",
                 bottom="20px",
                 right="20px",
                 z_index="1000",
-                style={
-                    "transition": "all 0.3s ease-in-out"
-                }
+                style={"transition": "all 0.3s ease-in-out"},
             )
         ),
-
         # Initialize Spotify updates when component mounts
-        on_mount=SpotifyState.start_spotify_updates
+        on_mount=SpotifyState.start_spotify_updates,
     )

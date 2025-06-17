@@ -1,74 +1,8 @@
 # site/pages/blog_post.py
 import reflex as rx
-from retest.site.components.blog_widget import BlogState
 from retest.site.components.mobile_nav import mobile_navigation
 from retest.site.pages.index import modern_header
-
-
-class BlogPostState(rx.State):
-    """State for an individual blog post page."""
-    article_identifier: str = ""
-    post_data: dict = {}
-
-    @rx.event
-    def fetch_article_identifier_on_load(self):
-        """Fetches the slug from router params and loads the post."""
-        self.article_identifier = self.router.page.params.get("slug", "")
-        self.load_post_data()
-
-    def load_post_data(self):
-        """Load the specific post data."""
-        # Initialize BlogState and load posts
-        import os
-        import glob
-
-        posts_dir = "/home/ubuntu/retest/retest/public/blog_posts"
-
-        if os.path.exists(posts_dir):
-            md_files = glob.glob(os.path.join(posts_dir, "*.md"))
-            for md_file in md_files:
-                try:
-                    with open(md_file, 'r', encoding='utf-8') as f:
-                        content = f.read()
-
-                    # Extract filename for slug
-                    filename = os.path.basename(md_file)
-                    slug = os.path.splitext(filename)[0]
-
-                    if slug == self.article_identifier:
-                        # Parse frontmatter and content
-                        lines = content.split('\n')
-                        title = slug.replace(
-                            '-', ' ').replace('_', ' ').title()
-                        excerpt = "Read more..."
-
-                        # Try to extract title from first heading
-                        for line in lines:
-                            if line.startswith('# '):
-                                title = line[2:].strip()
-                                break
-
-                        # Extract excerpt from first paragraph
-                        for line in lines:
-                            if line.strip() and not line.startswith('#') and not line.startswith('---'):
-                                excerpt = line.strip()
-                                if len(excerpt) > 100:
-                                    excerpt = excerpt[:100] + "..."
-                                break
-
-                        self.post_data = {
-                            "slug": slug,
-                            "title": title,
-                            "excerpt": excerpt,
-                            "content": content,
-                            "date": "Recent",
-                            "tags": ["Blog"]
-                        }
-                        return
-                except Exception as e:
-                    print(f"Error loading {md_file}: {e}")
-
-        self.post_data = {}
+from retest.site.state import BlogPostState
 
 
 def blog_post() -> rx.Component:
@@ -83,13 +17,12 @@ def blog_post() -> rx.Component:
                         rx.icon("arrow-left", size=16),
                         rx.text("Back to Blog"),
                         align_items="center",
-                        spacing="2"
+                        spacing="2",
                     ),
                     href="/blog",
                     color_scheme="blue",
-                    margin_bottom="2rem"
+                    margin_bottom="2rem",
                 ),
-
                 # Blog post content
                 rx.cond(
                     BlogPostState.post_data == {},
@@ -99,18 +32,18 @@ def blog_post() -> rx.Component:
                             rx.text("📄", font_size="3rem"),
                             rx.heading("Post Not Found", size="6"),
                             rx.text(
-                                f"The blog post could not be found.",
+                                "The blog post could not be found.",
                                 size="3",
                                 color_scheme="gray",
-                                text_align="center"
+                                text_align="center",
                             ),
                             rx.link(
                                 rx.button("← Back to Blog", variant="outline"),
-                                href="/blog"
+                                href="/blog",
                             ),
                             spacing="4",
                             align_items="center",
-                            padding="3rem"
+                            padding="3rem",
                         )
                     ),
                     # Post found - render markdown content
@@ -118,33 +51,29 @@ def blog_post() -> rx.Component:
                         # Post header
                         rx.vstack(
                             rx.heading(
-                                BlogPostState.post_data.get(
-                                    "title", "Blog Post"),
+                                BlogPostState.post_data.get("title", "Blog Post"),
                                 size="8",
-                                margin_bottom="1rem"
+                                margin_bottom="1rem",
                             ),
                             rx.hstack(
                                 rx.text(
                                     BlogPostState.post_data.get("date", ""),
                                     size="3",
-                                    color_scheme="gray"
+                                    color_scheme="gray",
                                 ),
-                                rx.badge("Blog", variant="soft",
-                                         color_scheme="blue"),
+                                rx.badge("Blog", variant="soft", color_scheme="blue"),
                                 spacing="2",
-                                align_items="center"
+                                align_items="center",
                             ),
                             align_items="start",
                             spacing="3",
                             margin_bottom="2rem",
                             padding_bottom="1rem",
-                            border_bottom="1px solid var(--gray-a4)"
+                            border_bottom="1px solid var(--gray-a4)",
                         ),
-
                         # Markdown content
                         rx.box(
-                            rx.markdown(
-                                BlogPostState.post_data.get("content", "")),
+                            rx.markdown(BlogPostState.post_data.get("content", "")),
                             width="100%",
                             # style={
                             #     "line_height": "1.7",
@@ -175,18 +104,16 @@ def blog_post() -> rx.Component:
                             #     }
                             # }
                         ),
-
                         spacing="4",
                         align_items="start",
-                        width="100%"
-                    )
+                        width="100%",
+                    ),
                 ),
-
                 spacing="4",
                 align_items="start",
                 width="100%",
                 # Extra bottom margin on mobile for nav
-                margin_bottom=["6rem", "6rem", "2rem"]
+                margin_bottom=["6rem", "6rem", "2rem"],
             ),
             size="3",
             padding="2rem",

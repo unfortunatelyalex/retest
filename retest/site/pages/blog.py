@@ -1,8 +1,9 @@
 # site/pages/blog.py
 import reflex as rx
-from retest.site.components.blog_widget import BlogState
+from retest.site.state import BlogState
 from retest.site.components.mobile_nav import mobile_navigation
 from retest.site.pages.index import modern_header
+
 
 def blog():
     """Blog index page listing all available posts."""
@@ -17,29 +18,27 @@ def blog():
                             rx.icon("arrow-left", size=16),
                             rx.text("Back to Home"),
                             align_items="center",
-                            spacing="2"
+                            spacing="2",
                         ),
                         href="/",
                         color_scheme="blue",
-                        style={
-                            "_hover": {"text_decoration": "underline"}
-                        }
+                        style={"_hover": {"text_decoration": "underline"}},
                     ),
                     rx.spacer(),
                     width="100%",
-                    margin_bottom="2rem"
+                    margin_bottom="2rem",
                 ),
                 rx.vstack(
                     rx.heading("📝 Blog", size="8"),
                     rx.text(
-                        "Thoughts, ideas, and tutorials about coding and technology.", 
-                        size="4", 
+                        "Thoughts, ideas, and tutorials about coding and technology.",
+                        size="4",
                         color_scheme="gray",
-                        line_height="1.6"
+                        line_height="1.6",
                     ),
                     align_items="center",
                     spacing="3",
-                    margin_bottom="3rem"
+                    margin_bottom="3rem",
                 ),
                 rx.vstack(
                     rx.foreach(
@@ -49,31 +48,45 @@ def blog():
                                 rx.hstack(
                                     rx.vstack(
                                         rx.link(
-                                            post["title"], 
-                                            href=f"/blog/{post['slug']}", 
+                                            post["title"],
+                                            href=f"/blog/{post['slug']}",
                                             size="5",
                                             weight="bold",
                                             color_scheme="blue",
                                             style={
-                                                "_hover": {"text_decoration": "underline"}
-                                            }
+                                                "_hover": {
+                                                    "text_decoration": "underline"
+                                                }
+                                            },
                                         ),
                                         rx.text(
-                                            post.get("excerpt", "Read more about this topic..."), 
-                                            size="3", 
+                                            post.get(
+                                                "excerpt",
+                                                "Read more about this topic...",
+                                            ),
+                                            size="3",
                                             color_scheme="gray",
                                             line_height="1.5",
-                                            margin_top="0.5rem"
+                                            margin_top="0.5rem",
                                         ),
                                         rx.hstack(
-                                            rx.text(post.get("date", ""), size="2", color_scheme="gray"),
-                                            rx.badge("Blog", variant="soft", size="1", color_scheme="blue"),
+                                            rx.text(
+                                                post.get("date", ""),
+                                                size="2",
+                                                color_scheme="gray",
+                                            ),
+                                            rx.badge(
+                                                "Blog",
+                                                variant="soft",
+                                                size="1",
+                                                color_scheme="blue",
+                                            ),
                                             align_items="center",
                                             spacing="2",
-                                            margin_top="1rem"
+                                            margin_top="1rem",
                                         ),
                                         align_items="start",
-                                        spacing="1"
+                                        spacing="1",
                                     ),
                                     rx.spacer(),
                                     rx.button(
@@ -81,23 +94,23 @@ def blog():
                                         "Read",
                                         on_click=rx.redirect(f"/blog/{post['slug']}"),
                                         variant="outline",
-                                        size="2"
+                                        size="2",
                                     ),
                                     align_items="start",
-                                    width="100%"
+                                    width="100%",
                                 ),
                                 align_items="start",
-                                spacing="3"
+                                spacing="3",
                             ),
                             width="100%",
                             style={
                                 "_hover": {
                                     "transform": "translateY(-2px)",
                                     "box_shadow": "0 8px 25px rgba(0,0,0,0.1)",
-                                    "transition": "all 0.2s ease"
+                                    "transition": "all 0.2s ease",
                                 }
-                            }
-                        )
+                            },
+                        ),
                     ),
                     rx.cond(
                         BlogState.posts_count == 0,
@@ -109,17 +122,17 @@ def blog():
                                     "Add some markdown files to the /public/blog_posts directory to see them here!",
                                     size="3",
                                     color_scheme="gray",
-                                    text_align="center"
+                                    text_align="center",
                                 ),
                                 spacing="3",
                                 align_items="center",
-                                padding="2rem"
+                                padding="2rem",
                             )
                         ),
-                        rx.fragment()
+                        rx.fragment(),
                     ),
                     spacing="4",
-                    width="100%"
+                    width="100%",
                 ),
                 rx.spacer(),
                 rx.link(
@@ -127,16 +140,20 @@ def blog():
                         rx.icon("arrow-left", size=16),
                         rx.text("Back to Home"),
                         align_items="center",
-                        spacing="2"
+                        spacing="2",
                     ),
                     href="/",
                     color_scheme="blue",
-                    margin_top="3rem"
+                    margin_top="3rem",
                 ),
                 spacing="6",
                 align_items="center",
                 width="100%",
-                margin_bottom=["6rem", "6rem", "2rem"]  # Extra bottom margin on mobile for nav
+                margin_bottom=[
+                    "6rem",
+                    "6rem",
+                    "2rem",
+                ],  # Extra bottom margin on mobile for nav
             ),
             size="3",
             padding="2rem",

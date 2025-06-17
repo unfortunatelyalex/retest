@@ -4,6 +4,8 @@ import httpx
 import requests
 import base64
 import time
+import glob
+import re
 from datetime import datetime, timedelta
 import reflex as rx
 from dotenv import load_dotenv
@@ -21,9 +23,6 @@ class DashboardState(rx.State):
     # Provide a default order as fallback if not found in storage.
     # default widget order (fallback)
     widget_order: str = rx.LocalStorage("0,1,2")
-    # GitHub activity stats
-    commits_by_month: list = [
-        ("Jan 2025", 42), ("Feb 2025", 30), ("Mar 2025", 51), ("Apr 2025", 22)]
 
     def move_widget(self, from_index: int, to_index: int) -> None:
         """Reorder the widgets by moving the item at from_index to to_index."""
@@ -33,7 +32,12 @@ class DashboardState(rx.State):
         # Convert the comma-separated string to a list.
         order_list = self.widget_order.split(",")
         # Ensure indices are within bounds.
-        if from_index < 0 or from_index >= len(order_list) or to_index < 0 or to_index >= len(order_list):
+        if (
+            from_index < 0
+            or from_index >= len(order_list)
+            or to_index < 0
+            or to_index >= len(order_list)
+        ):
             return
         # Remove the widget from the old position and insert it at the new position.
         widget = order_list.pop(from_index)
@@ -44,10 +48,11 @@ class DashboardState(rx.State):
 
 class SpotifyState(rx.State):
     """App state holding current track info."""
+
     # interval for automatic updates (in seconds)
     update_interval: int = 20
-    current_track: str = ""       # e.g. "Song Title – Artist"
-    current_cover_url: str = ""   # URL of album art image
+    current_track: str = ""  # e.g. "Song Title – Artist"
+    current_cover_url: str = ""  # URL of album art image
     is_fetching: bool = False
     auto_refresh: bool = False
     spotify_access_token: str = ""
@@ -75,6 +80,7 @@ class SpotifyState(rx.State):
 
         # Calculate time elapsed since last API update
         import time
+
         current_time = time.time()
         elapsed_seconds = current_time - self.last_update_time
         elapsed_ms = int(elapsed_seconds * 1000)
@@ -116,7 +122,10 @@ class SpotifyState(rx.State):
     @rx.var
     def background_image_url(self) -> str:
         """Get background image URL for the Spotify badge."""
-        if self.current_cover_url and self.current_cover_url != "/placeholder_cover.png":
+        if (
+            self.current_cover_url
+            and self.current_cover_url != "/placeholder_cover.png"
+        ):
             return f"url('{self.current_cover_url}')"
         return "none"
 
@@ -141,17 +150,18 @@ class SpotifyState(rx.State):
 
         headers = {
             "Authorization": f"Basic {auth_base64}",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token
-        }
+        data = {"grant_type": "refresh_token", "refresh_token": refresh_token}
 
         try:
             response = requests.post(
-                "https://accounts.spotify.com/api/token", headers=headers, data=data, timeout=5)
+                "https://accounts.spotify.com/api/token",
+                headers=headers,
+                data=data,
+                timeout=5,
+            )
             response.raise_for_status()
 
             token_data = response.json()
@@ -195,9 +205,7 @@ class SpotifyState(rx.State):
 
         # Start both timers concurrently
         await asyncio.gather(
-            self._spotify_api_loop(),
-            pseudo_timer(),
-            return_exceptions=True
+            self._spotify_api_loop(), pseudo_timer(), return_exceptions=True
         )
 
     async def _spotify_api_loop(self):
@@ -240,15 +248,13 @@ class SpotifyState(rx.State):
                 if isinstance(expires_at, int):
                     self.spotify_token_expires_at = expires_at
 
-            headers = {
-                "Authorization": f"Bearer {access_token}"
-            }
+            headers = {"Authorization": f"Bearer {access_token}"}
 
             # Get currently playing track
             response = requests.get(
                 "https://api.spotify.com/v1/me/player/currently-playing",
                 headers=headers,
-                timeout=5
+                timeout=5,
             )
 
             # Record the time when we got fresh data
@@ -315,13 +321,14 @@ class SpotifyState(rx.State):
             song_url = track.get("external_urls", {}).get("spotify", "")
             artist_url = ""
             if artists:
-                artist_url = artists[0].get(
-                    "external_urls", {}).get("spotify", "")
+                artist_url = artists[0].get("external_urls", {}).get("spotify", "")
 
             # Update state with better error handling for disconnected clients
             try:
                 async with self:
-                    self.current_track = track_display if track_display else "Unknown Track"
+                    self.current_track = (
+                        track_display if track_display else "Unknown Track"
+                    )
                     self.current_cover_url = cover_url
                     self.is_playing = is_playing
                     self.progress_ms = progress_ms
@@ -334,7 +341,11 @@ class SpotifyState(rx.State):
                 pass
 
         except requests.exceptions.RequestException as e:
-            if hasattr(e, 'response') and e.response is not None and e.response.status_code == 401:
+            if (
+                hasattr(e, "response")
+                and e.response is not None
+                and e.response.status_code == 401
+            ):
                 # Token might be expired, clear it to force refresh
                 try:
                     async with self:
@@ -369,16 +380,14 @@ class SpotifyState(rx.State):
         if isinstance(expires_at, int):
             self.spotify_token_expires_at = expires_at
 
-        headers = {
-            "Authorization": f"Bearer {access_token}"
-        }
+        headers = {"Authorization": f"Bearer {access_token}"}
 
         try:
             # Get currently playing track
             response = requests.get(
                 "https://api.spotify.com/v1/me/player/currently-playing",
                 headers=headers,
-                timeout=5
+                timeout=5,
             )
 
             # Record the time when we got fresh data
@@ -437,8 +446,7 @@ class SpotifyState(rx.State):
             song_url = track.get("external_urls", {}).get("spotify", "")
             artist_url = ""
             if artists:
-                artist_url = artists[0].get(
-                    "external_urls", {}).get("spotify", "")
+                artist_url = artists[0].get("external_urls", {}).get("spotify", "")
 
             self.current_track = track_display if track_display else "Unknown Track"
             self.current_cover_url = cover_url
@@ -450,12 +458,17 @@ class SpotifyState(rx.State):
             self.last_update_time = current_time  # Record when we got this data
 
         except requests.exceptions.RequestException as e:
-            if hasattr(e, 'response') and e.response is not None and e.response.status_code == 401:
+            if (
+                hasattr(e, "response")
+                and e.response is not None
+                and e.response.status_code == 401
+            ):
                 # Token might be expired, clear it to force refresh
                 self.spotify_access_token = ""
                 self.spotify_token_expires_at = 0
                 print(
-                    "Spotify access token expired or invalid, will refresh on next call")
+                    "Spotify access token expired or invalid, will refresh on next call"
+                )
             else:
                 print(f"Failed to fetch data from Spotify: {e}")
         except Exception as e:
@@ -505,9 +518,9 @@ class GitHubState(rx.State):
             self.chart_ready = False  # Chart not ready due to error
             return
 
-        # Calculate date range for past year
+        # Calculate date range for past year (start 1 day earlier to match GitHub's behavior)
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=365)
+        start_date = end_date - timedelta(days=366)
 
         # GraphQL query for contribution data
         query = """
@@ -535,12 +548,12 @@ class GitHubState(rx.State):
         variables = {
             "username": self.github_username,
             "from": start_date.isoformat(),
-            "to": end_date.isoformat()
+            "to": end_date.isoformat(),
         }
 
         headers = {
             "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         try:
@@ -548,7 +561,7 @@ class GitHubState(rx.State):
                 "https://api.github.com/graphql",
                 json={"query": query, "variables": variables},
                 headers=headers,
-                timeout=10
+                timeout=10,
             )
             response.raise_for_status()
 
@@ -579,13 +592,17 @@ class GitHubState(rx.State):
             for week in calendar["weeks"]:
                 week_data = []
                 for day in week["contributionDays"]:
-                    week_data.append({
-                        "date": day["date"],
-                        "count": day["contributionCount"],
-                        "level": self._get_contribution_level(day["contributionCount"]),
-                        # Keep original API level for reference
-                        "api_level": day["contributionLevel"]
-                    })
+                    week_data.append(
+                        {
+                            "date": day["date"],
+                            "count": day["contributionCount"],
+                            "level": self._get_contribution_level(
+                                day["contributionCount"]
+                            ),
+                            # Keep original API level for reference
+                            "api_level": day["contributionLevel"],
+                        }
+                    )
                 self.contribution_weeks.append(week_data)
 
             # Generate month labels
@@ -618,20 +635,21 @@ class GitHubState(rx.State):
 
     def _generate_month_labels(self):
         """Generate month labels for the chart showing the last 13 months
-           (e.g., from July last year to July this year, inclusive)."""
+        (e.g., from July last year to July this year, inclusive)."""
         self.months = []
 
         current_date = datetime.now()
 
-        # This is the reference start date for the 365-day contribution data window.
+        # This is the reference start date for the 366-day contribution data window.
         # Week indices for month labels are calculated relative to this date.
-        data_period_start_ref_date = current_date - timedelta(days=365)
+        data_period_start_ref_date = current_date - timedelta(days=366)
 
         # Determine the first month for the labels:
         # This will be the month of (current_date - 1 year), set to the 1st day.
         # e.g., if current_date is July 15, 2024, month_iterator_start_date is July 1, 2023.
         month_iterator_start_date = current_date.replace(
-            day=1, year=current_date.year - 1)
+            day=1, year=current_date.year - 1
+        )
 
         # Determine the last month for the labels:
         # This will be the current month, set to the 1st day.
@@ -650,23 +668,26 @@ class GitHubState(rx.State):
                 # Calculate the approximate week index for this month's label.
                 # This is the number of weeks from data_period_start_ref_date to the current month_iterator_dt.
                 # month_iterator_dt is already the 1st of the month.
-                days_offset = (month_iterator_dt -
-                               data_period_start_ref_date).days
+                days_offset = (month_iterator_dt - data_period_start_ref_date).days
                 week_index = max(0, days_offset // 7)
 
-                self.months.append({
-                    "name": month_iterator_dt.strftime("%b"),  # e.g., "Jul"
-                    "week_index": week_index
-                })
+                self.months.append(
+                    {
+                        "name": month_iterator_dt.strftime("%b"),  # e.g., "Jul"
+                        "week_index": week_index,
+                    }
+                )
                 months_seen.add(month_key)
 
             # Advance to the first day of the next month
             if month_iterator_dt.month == 12:
                 month_iterator_dt = month_iterator_dt.replace(
-                    year=month_iterator_dt.year + 1, month=1)
+                    year=month_iterator_dt.year + 1, month=1
+                )
             else:
                 month_iterator_dt = month_iterator_dt.replace(
-                    month=month_iterator_dt.month + 1)
+                    month=month_iterator_dt.month + 1
+                )
 
         # This loop structure is designed to produce exactly 13 month labels
         # (e.g., from July 1, 2023, to July 1, 2024, inclusive).
@@ -701,14 +722,21 @@ class TooltipState(rx.State):
 
 class DiscordAvatarState(rx.State):
     """State for managing Discord avatar fetching"""
+
     avatar_url: str = "/profile.jpg"  # Fallback avatar
-    user_id: str = "399668151475765258"
-    guild_id: str = "791670762859266078"
+    user_id: str = os.getenv("DC_UID") or ""
+    guild_id: str = os.getenv("DC_GID") or ""
+    loading: bool = True  # Loading state for skeleton wrapper
 
     @rx.event
     async def fetch_discord_avatar(self):
         """Fetch Discord avatar URL from Discord API using bot token"""
         try:
+            # Check if required environment variables are set
+            if not self.user_id or not self.guild_id:
+                print("DC_UID or DC_GID environment variables not found")
+                return
+
             # Get Discord bot token from environment
             discord_token = os.getenv("DC_TOKEN")
             if not discord_token:
@@ -717,13 +745,13 @@ class DiscordAvatarState(rx.State):
 
             headers = {
                 "Authorization": f"Bot {discord_token}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             async with httpx.AsyncClient() as client:
                 response = await client.get(
                     f"https://discord.com/api/v10/guilds/{self.guild_id}/members/{self.user_id}",
-                    headers=headers
+                    headers=headers,
                 )
 
                 if response.status_code == 200:
@@ -732,21 +760,325 @@ class DiscordAvatarState(rx.State):
 
                     if avatar_hash:
                         # Construct the full avatar URL
-                        # https://cdn.discordapp.com/guilds/791670762859266078/users/399668151475765258/avatars/d2ddc931f4e03058643a607ffcb692a9.png?size=4096
                         self.avatar_url = f"https://cdn.discordapp.com/guilds/{self.guild_id}/users/{self.user_id}/avatars/{avatar_hash}.png?size=4096"
                     else:
                         # User has no custom avatar, use default
                         discriminator = user_data.get("discriminator", "0")
                         if discriminator == "0":  # New username system
-                            default_avatar_index = (
-                                int(self.user_id) >> 22) % 6
+                            default_avatar_index = (int(self.user_id) >> 22) % 6
                         else:  # Legacy discriminator system
                             default_avatar_index = int(discriminator) % 5
                         self.avatar_url = f"https://cdn.discordapp.com/embed/avatars/{default_avatar_index}.png"
                 else:
                     print(
-                        f"Discord API error: {response.status_code} - {response.text}")
+                        f"Discord API error: {response.status_code} - {response.text}"
+                    )
 
         except Exception as e:
             print(f"Error fetching Discord avatar: {e}")
             # Keep fallback avatar on error
+        finally:
+            # Always set loading to False when done
+            self.loading = False
+
+
+class ClockState(rx.State):
+    """State for the live clock widget."""
+
+    current_time: str = datetime.now().strftime("%H:%M:%S")
+    current_date: str = datetime.now().strftime("%B %d, %Y")
+    is_running: bool = False
+
+    @rx.event
+    def update_time(self):
+        """Update the current time."""
+        now = datetime.now()
+        self.current_time = now.strftime("%H:%M:%S")
+        self.current_date = now.strftime("%B %d, %Y")
+
+    @rx.event(background=True)
+    async def start_clock(self):
+        """Start the live clock updates."""
+        async with self:
+            if self.is_running:
+                return
+            self.is_running = True
+
+        while True:
+            async with self:
+                if not self.is_running:
+                    break
+                now = datetime.now()
+                self.current_time = now.strftime("%H:%M:%S")
+                self.current_date = now.strftime("%B %d, %Y")
+
+            await asyncio.sleep(1)  # Update every second
+
+    @rx.event
+    def stop_clock(self):
+        """Stop the live clock updates."""
+        self.is_running = False
+
+
+class SpotifyBadgeState(rx.State):
+    """State for managing the Spotify badge visibility."""
+
+    is_expanded: bool = False
+
+    @rx.event
+    def toggle_badge(self):
+        """Toggle the badge expansion."""
+        self.is_expanded = not self.is_expanded
+
+    @rx.event
+    def collapse_badge(self):
+        """Collapse the badge."""
+        self.is_expanded = False
+
+    @rx.event
+    def expand_badge(self):
+        """Expand the badge."""
+        self.is_expanded = True
+
+
+class BlogState(rx.State):
+    """State for managing blog posts from markdown files."""
+
+    posts: List[Dict] = []
+
+    @rx.event
+    def load_posts(self):
+        """Load all blog posts from markdown files."""
+        posts_dir = "/home/ubuntu/retest/retest/public/blog_posts"
+        self.posts = []
+
+        if os.path.exists(posts_dir):
+            md_files = glob.glob(os.path.join(posts_dir, "*.md"))
+            for md_file in md_files:
+                try:
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                    # Extract filename for slug
+                    filename = os.path.basename(md_file)
+                    slug = os.path.splitext(filename)[0]
+
+                    # Parse frontmatter and content
+                    lines = content.split("\n")
+                    title = slug.replace("-", " ").replace("_", " ").title()
+                    excerpt = "Read more..."
+
+                    # Try to extract title from first heading
+                    for line in lines:
+                        if line.startswith("# "):
+                            title = line[2:].strip()
+                            break
+
+                    # Extract excerpt from first paragraph
+                    for line in lines:
+                        if (
+                            line.strip()
+                            and not line.startswith("#")
+                            and not line.startswith("---")
+                        ):
+                            excerpt = line.strip()
+                            if len(excerpt) > 100:
+                                excerpt = excerpt[:100] + "..."
+                            break
+
+                    post = {
+                        "slug": slug,
+                        "title": title,
+                        "excerpt": excerpt,
+                        "content": content,
+                        "date": "Recent",  # Could be extracted from file date
+                        "tags": ["Blog"],
+                    }
+                    self.posts.append(post)
+                except Exception as e:
+                    print(f"Error loading {md_file}: {e}")
+
+        # Sort posts by filename for consistent ordering
+        self.posts.sort(key=lambda x: x["slug"])
+
+    @rx.var
+    def preview_posts(self) -> List[Dict]:
+        """Get only the first 3 posts for preview."""
+        return self.posts[:3]
+
+    @rx.var
+    def has_more_posts(self) -> bool:
+        """Check if there are more than 3 posts."""
+        return len(self.posts) > 3
+
+    @rx.var
+    def posts_count(self) -> int:
+        """Get the total number of posts."""
+        return len(self.posts)
+
+    def get_post_by_slug(self, slug: str) -> Dict | None:
+        """Get a specific post by slug."""
+        for post in self.posts:
+            if post["slug"] == slug:
+                return post
+        return None
+
+
+class ContactState(rx.State):
+    name: str = ""
+    email: str = ""
+    message: str = ""
+    submit_success: bool = False
+    name_error: str = ""
+    email_error: str = ""
+    message_error: str = ""
+    is_submitting: bool = False
+
+    @rx.event
+    def validate_name(self):
+        self.set_name(self.name)  # Ensure the value is set
+        if len(self.name.strip()) < 2:
+            self.name_error = "Name must be at least 2 characters"
+        else:
+            self.name_error = ""
+
+    @rx.event
+    def validate_email(self):
+        self.set_email(self.email)  # Ensure the value is set
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, self.email):
+            self.email_error = "Please enter a valid email address"
+        else:
+            self.email_error = ""
+
+    @rx.event
+    def validate_message(self):
+        self.set_message(self.message)  # Ensure the value is set
+        if len(self.message.strip()) < 10:
+            self.message_error = "Message must be at least 10 characters"
+        else:
+            self.message_error = ""
+
+    @rx.event
+    async def send_message(self):
+        # Validate all fields
+        self.validate_name()
+        self.validate_email()
+        self.validate_message()
+
+        # Check if there are any errors
+        if self.name_error or self.email_error or self.message_error:
+            return
+
+        self.is_submitting = True
+        yield
+
+        # Simulate API call delay
+        await asyncio.sleep(1)
+
+        # Here you'd integrate an email sending service (e.g., SMTP or API call).
+        # For now, we simply mark success and print the message server-side.
+        print(f"New contact message from {self.name} ({self.email}): {self.message}")
+
+        self.submit_success = True
+        self.is_submitting = False
+
+        # Clear form after success
+        self.name = ""
+        self.email = ""
+        self.message = ""
+
+    @rx.event
+    def set_name(self, value: str):
+        self.name = value
+        if self.name_error:  # Clear error when user starts typing
+            self.name_error = ""
+
+    @rx.event
+    def set_email(self, value: str):
+        self.email = value
+        if self.email_error:  # Clear error when user starts typing
+            self.email_error = ""
+
+    @rx.event
+    def set_message(self, value: str):
+        self.message = value
+        if self.message_error:  # Clear error when user starts typing
+            self.message_error = ""
+
+    @rx.event
+    def reset_form(self):
+        self.submit_success = False
+        self.name = ""
+        self.email = ""
+        self.message = ""
+        self.name_error = ""
+        self.email_error = ""
+        self.message_error = ""
+
+
+class BlogPostState(rx.State):
+    """State for an individual blog post page."""
+
+    article_identifier: str = ""
+    post_data: dict = {}
+
+    @rx.event
+    def fetch_article_identifier_on_load(self):
+        """Fetches the slug from router params and loads the post."""
+        self.article_identifier = self.router.page.params.get("slug", "")
+        self.load_post_data()
+
+    def load_post_data(self):
+        """Load the specific post data."""
+        # Initialize BlogState and load posts
+        posts_dir = "/home/ubuntu/retest/retest/public/blog_posts"
+
+        if os.path.exists(posts_dir):
+            md_files = glob.glob(os.path.join(posts_dir, "*.md"))
+            for md_file in md_files:
+                try:
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                    # Extract filename for slug
+                    filename = os.path.basename(md_file)
+                    slug = os.path.splitext(filename)[0]
+
+                    if slug == self.article_identifier:
+                        # Parse frontmatter and content
+                        lines = content.split("\n")
+                        title = slug.replace("-", " ").replace("_", " ").title()
+                        excerpt = "Read more..."
+
+                        # Try to extract title from first heading
+                        for line in lines:
+                            if line.startswith("# "):
+                                title = line[2:].strip()
+                                break
+
+                        # Extract excerpt from first paragraph
+                        for line in lines:
+                            if (
+                                line.strip()
+                                and not line.startswith("#")
+                                and not line.startswith("---")
+                            ):
+                                excerpt = line.strip()
+                                if len(excerpt) > 100:
+                                    excerpt = excerpt[:100] + "..."
+                                break
+
+                        self.post_data = {
+                            "slug": slug,
+                            "title": title,
+                            "excerpt": excerpt,
+                            "content": content,
+                            "date": "Recent",
+                            "tags": ["Blog"],
+                        }
+                        return
+                except Exception as e:
+                    print(f"Error loading {md_file}: {e}")
+
+        self.post_data = {}
