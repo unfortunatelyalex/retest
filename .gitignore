@@ -9,5 +9,4 @@ __pycache__/
 .vscode
 .git
 .env
-requirements.txt
 */blog_posts/*
