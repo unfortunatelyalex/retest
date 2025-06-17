@@ -440,6 +440,27 @@ class SpotifyState(rx.State):
         self.is_fetching = False
 
 
+class SpotifyBadgeState(rx.State):
+    """State for managing the Spotify badge visibility."""
+
+    is_expanded: bool = False
+
+    @rx.event
+    def toggle_badge(self):
+        """Toggle the badge expansion."""
+        self.is_expanded = not self.is_expanded
+
+    @rx.event
+    def collapse_badge(self):
+        """Collapse the badge."""
+        self.is_expanded = False
+
+    @rx.event
+    def expand_badge(self):
+        """Expand the badge."""
+        self.is_expanded = True
+
+
 class GitHubState(rx.State):
     """State for managing GitHub contribution data."""
 
@@ -781,27 +802,6 @@ class ClockState(rx.State):
     def stop_clock(self):
         """Stop the live clock updates."""
         self.is_running = False
-
-
-class SpotifyBadgeState(rx.State):
-    """State for managing the Spotify badge visibility."""
-
-    is_expanded: bool = False
-
-    @rx.event
-    def toggle_badge(self):
-        """Toggle the badge expansion."""
-        self.is_expanded = not self.is_expanded
-
-    @rx.event
-    def collapse_badge(self):
-        """Collapse the badge."""
-        self.is_expanded = False
-
-    @rx.event
-    def expand_badge(self):
-        """Expand the badge."""
-        self.is_expanded = True
 
 
 class BlogState(rx.State):

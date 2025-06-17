@@ -6,7 +6,13 @@ from retest.site.components import (
     about_contact,
 )
 from retest.site.components.github_widget import github_widget
-from retest.site.state import SpotifyState, GitHubState, DiscordAvatarState, ClockState
+from retest.site.state import GitHubState, DiscordAvatarState, ClockState
+
+# Theme colors (to avoid circular imports)
+THEME_COLORS = {
+    "light_bg": "#fdf3ea",  # Custom warm cream background
+    "dark_bg": "#0a0a0a",   # Deep dark background
+}
 
 
 def theme_toggle_button() -> rx.Component:
@@ -290,6 +296,11 @@ def index():
         width="100vw",
         min_height="100vh",
         padding="2rem",
+        background_color=rx.cond(
+            rx.color_mode == "light",
+            THEME_COLORS["light_bg"],
+            THEME_COLORS["dark_bg"]
+        ),
         style={
             # "@media (max-width: 768px)": {"padding": "1rem"},
             "@keyframes fadeIn": {

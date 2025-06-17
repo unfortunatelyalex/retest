@@ -4,6 +4,12 @@ from retest.site.state import BlogState
 from retest.site.components.mobile_nav import mobile_navigation
 from retest.site.pages.index import modern_header
 
+# Theme colors (to avoid circular imports)
+THEME_COLORS = {
+    "light_bg": "#fdf3ea",  # Custom warm cream background
+    "dark_bg": "#0a0a0a",   # Deep dark background
+}
+
 
 def blog():
     """Blog index page listing all available posts."""
@@ -163,4 +169,9 @@ def blog():
         width="100vw",
         min_height="100vh",
         padding="2rem",
+        background_color=rx.cond(
+            rx.color_mode == "light",
+            THEME_COLORS["light_bg"],
+            THEME_COLORS["dark_bg"]
+        ),
     )

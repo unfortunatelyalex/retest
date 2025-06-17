@@ -4,6 +4,12 @@ from retest.site.components.mobile_nav import mobile_navigation
 from retest.site.pages.index import modern_header
 from retest.site.state import BlogPostState
 
+# Theme colors (to avoid circular imports)
+THEME_COLORS = {
+    "light_bg": "#fdf3ea",  # Custom warm cream background
+    "dark_bg": "#0a0a0a",   # Deep dark background
+}
+
 
 def blog_post() -> rx.Component:
     """A page to display an individual blog post."""
@@ -123,6 +129,11 @@ def blog_post() -> rx.Component:
         width="100vw",
         min_height="100vh",
         padding="2rem",
+        background_color=rx.cond(
+            rx.color_mode == "light",
+            THEME_COLORS["light_bg"],
+            THEME_COLORS["dark_bg"]
+        ),
         # style={
         #     "box_sizing": "border_box",
         #     "background": rx.color("gray", 2),  # Add this line
