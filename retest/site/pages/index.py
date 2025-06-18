@@ -240,7 +240,7 @@ def dashboard_card(component: rx.Component, **kwargs) -> rx.Component:
             "background": rx.color("gray", 1),
         },
         size="4",
-        **kwargs
+        **kwargs,
     )
 
 
