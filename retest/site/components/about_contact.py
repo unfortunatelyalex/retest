@@ -70,17 +70,32 @@ def AboutSection():
                     ),
                     spacing="2",
                 ),
-                rx.button(
-                    rx.icon("download", size=16),
-                    "Download CV",
-                    variant="outline",
-                    size="2",
-                    on_click=rx.toast.info(
-                        "CV download is not implemented yet.",
-                        duration=3000,
+                rx.popover.root(
+                    rx.popover.trigger(
+                        rx.button(
+                            rx.icon("download", size=16),
+                            "Download CV",
+                            variant="outline",
+                            size="2",
+                            # on_click=rx.toast.info(
+                            #     "CV download is not implemented yet.",
+                            #     duration=3000,
+                            #     position="top-center",
+                            # ),
+                        ),
+                        # rx.download(
+                        #         url="/cv.pdf", filename="Alex_CV.pdf")
                     ),
-                    # rx.download(
-                    #         url="/cv.pdf", filename="Alex_CV.pdf")
+                    rx.popover.content(
+                        rx.flex(
+                            rx.text("CV download is not implemented yet."),
+                            rx.popover.close(
+                                rx.button("Close"),
+                            ),
+                            direction="column",
+                            spacing="3",
+                        ),
+                    ),
                 ),
                 align_items="start",
                 spacing="3",
