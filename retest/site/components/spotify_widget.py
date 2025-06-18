@@ -50,7 +50,6 @@ def spotify_collapsed_badge() -> rx.Component:
                 "transform": "scale(1.05)",
                 "box_shadow": "0 6px 20px rgba(0,0,0,0.2)",
             },
-            "transition": "all 0.2s ease",
         },
     )
 
