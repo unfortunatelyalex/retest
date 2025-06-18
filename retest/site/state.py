@@ -502,9 +502,9 @@ class GitHubState(rx.State):
             self.chart_ready = False  # Chart not ready due to error
             return
 
-        # Calculate date range for past year (start 1 day earlier to match GitHub's behavior)
+        # Calculate date range for past year
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=366)
+        start_date = end_date - timedelta(days=371)
 
         # GraphQL query for contribution data
         query = """
