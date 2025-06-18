@@ -10,3 +10,4 @@ __pycache__/
 .git
 .env
 retest/public/blog_posts/*
+backup
