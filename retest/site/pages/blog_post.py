@@ -7,7 +7,7 @@ from retest.site.state import BlogPostState
 # Theme colors (to avoid circular imports)
 THEME_COLORS = {
     "light_bg": "#fdf3ea",  # Custom warm cream background
-    "dark_bg": "#0a0a0a",   # Deep dark background
+    "dark_bg": "#0a0a0a",  # Deep dark background
 }
 
 
@@ -129,10 +129,8 @@ def blog_post() -> rx.Component:
         width="100vw",
         min_height="100vh",
         padding="2rem",
-        background_color=rx.cond(
-            rx.color_mode == "light",
-            THEME_COLORS["light_bg"],
-            THEME_COLORS["dark_bg"]
+        background_color=rx.color_mode_cond(
+            light=THEME_COLORS["light_bg"], dark=THEME_COLORS["dark_bg"]
         ),
         # style={
         #     "box_sizing": "border_box",

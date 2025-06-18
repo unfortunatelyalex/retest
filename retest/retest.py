@@ -12,10 +12,12 @@ DARK_MODE_BG_COLOR = "#0a0a0a"  # Deep dark background
 ACCENT_COLOR = "sky"  # Primary accent color
 GRAY_COLOR = "slate"  # Gray tone for better contrast
 
+
 # Utility functions for theme colors (can be imported by components)
 def get_theme_background_color(is_light_mode: bool = True) -> str:
     """Get the appropriate background color based on theme mode."""
     return LIGHT_MODE_BG_COLOR if is_light_mode else DARK_MODE_BG_COLOR
+
 
 def get_all_theme_colors() -> dict:
     """Get all theme colors for easy access."""
@@ -25,6 +27,7 @@ def get_all_theme_colors() -> dict:
         "accent": ACCENT_COLOR,
         "gray": GRAY_COLOR,
     }
+
 
 # Define a custom theme with improved contrast and accessibility
 custom_theme = rx.theme(
