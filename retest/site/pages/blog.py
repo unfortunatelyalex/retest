@@ -150,7 +150,7 @@ def blog():
                     ),
                     href="/",
                     color_scheme="blue",
-                    margin_top="3rem",
+                    margin_top="2rem",
                 ),
                 spacing="6",
                 align_items="center",
@@ -167,7 +167,7 @@ def blog():
         mobile_navigation(),
         on_mount=BlogState.load_posts,  # Add this line to load posts when page mounts
         width="100%",
-        min_height="100vh",
+        height="100%",
         padding="2rem",
         background_color=rx.color_mode_cond(
             light=THEME_COLORS["light_bg"], dark=THEME_COLORS["dark_bg"]
