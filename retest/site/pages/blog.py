@@ -166,7 +166,7 @@ def blog():
         ),
         mobile_navigation(),
         on_mount=BlogState.load_posts,  # Add this line to load posts when page mounts
-        width="100vw",
+        width="100%",
         min_height="100vh",
         padding="2rem",
         background_color=rx.color_mode_cond(
