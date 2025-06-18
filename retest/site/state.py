@@ -11,7 +11,7 @@ import reflex as rx
 from dotenv import load_dotenv
 from typing import Dict, List, Any, Optional
 
-load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
+load_dotenv(dotenv_path="/home/alex/retest/.env")
 
 app = rx.App()
 
@@ -812,7 +812,7 @@ class BlogState(rx.State):
     @rx.event
     def load_posts(self):
         """Load all blog posts from markdown files."""
-        posts_dir = "/home/ubuntu/retest/retest/public/blog_posts"
+        posts_dir = "/home/alex/retest/retest/public/blog_posts"
         self.posts = []
 
         if os.path.exists(posts_dir):
@@ -995,7 +995,7 @@ class BlogPostState(rx.State):
     def load_post_data(self):
         """Load the specific post data."""
         # Initialize BlogState and load posts
-        posts_dir = "/home/ubuntu/retest/retest/public/blog_posts"
+        posts_dir = "/home/alex/retest/retest/public/blog_posts"
 
         if os.path.exists(posts_dir):
             md_files = glob.glob(os.path.join(posts_dir, "*.md"))

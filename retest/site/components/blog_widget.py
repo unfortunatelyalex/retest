@@ -27,15 +27,13 @@ POSTS = [
 def BlogPreviewWidget():
     return rx.vstack(
         rx.hstack(
-            rx.heading(
-                "📜 Latest Posts", size="3", margin_bottom="0.25em"
-            ),  # Smaller heading
+            rx.heading("📜 Latest Posts", size="3", margin_bottom="0.25em"),
             rx.spacer(),
             rx.link(
                 rx.icon_button(
-                    rx.icon("external-link", size=14),  # Smaller icon
+                    rx.icon("external-link", size=14),
                     variant="ghost",
-                    size="2",  # Smaller button
+                    size="2",
                     aria_label="View all posts",
                 ),
                 href="/blog",
@@ -71,8 +69,8 @@ def BlogPreviewWidget():
                         ),
                         rx.text("Tags: Blog", size="1", color_scheme="gray"),
                         align_items="start",
-                        spacing="1",  # Reduced spacing
-                        padding="0.5rem",  # Reduced padding
+                        spacing="1",
+                        padding="0.5rem",
                         border_radius="md",
                         style={
                             "_hover": {
