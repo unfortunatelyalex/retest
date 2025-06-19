@@ -190,7 +190,7 @@ def sample_contribution_grid() -> rx.Component:
 
 
 def dynamic_month_labels() -> rx.Component:
-    """Dynamic month labels based on current date (last 12 months)."""
+    """Render non-overlapping month labels like GitHub."""
     return rx.cond(
         GitHubState.months != [],
         rx.flex(
@@ -205,21 +205,15 @@ def dynamic_month_labels() -> rx.Component:
                     font_weight="400",
                     text_align="left",
                     white_space="nowrap",
-                    overflow="hidden",
-                    # Position each month label at the right position
                     position="absolute",
-                    # 13px cell + 2px gap
                     left=f"calc({month['week_index']} * 15px)",
                 ),
             ),
-            # Fixed width to match the contribution grid exactly
             width="689px",  # 53 weeks * 13px + 52 gaps * 2px = 689px
             height="16px",
             position="relative",
             margin_bottom="1px",
         ),
-        # Fallback static labels
-        # static_month_labels()
     )
 
 
