@@ -44,9 +44,8 @@ def CodingStatsWidget():
 
     return rx.vstack(
         rx.heading("Personal Stats", size="4", margin_bottom="0.5em"),
-        # Programming languages with progress bars
         rx.vstack(
-            rx.text("Languages", weight="medium", size="3", margin_bottom="0.5em"),
+            rx.text("Attributes", weight="medium", size="3", margin_bottom="0.5em"),
             *[
                 rx.vstack(
                     rx.hstack(
@@ -68,7 +67,7 @@ def CodingStatsWidget():
                 for stat in stats
             ],
             spacing="3",
-            width="100%"
+            width="100%",
         ),
         rx.divider(),
         # Project stats
@@ -105,7 +104,7 @@ def CodingStatsWidget():
             ],
             columns="2",
             gap="3",
-            width="100%"
+            width="100%",
         ),
         align_items="start",
         spacing="4",
