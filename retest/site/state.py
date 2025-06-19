@@ -618,64 +618,55 @@ class GitHubState(rx.State):
             return 4  # Very high contributions
 
     def _generate_month_labels(self):
-        """Generate month labels for the chart showing the last 13 months
-        (e.g., from July last year to July this year, inclusive)."""
+        """Generate month labels for the GitHub-style contribution chart."""
+        from datetime import datetime, timedelta
+
         self.months = []
+        min_weeks_between_labels = 4  # adjust as needed to prevent overlaps
 
         current_date = datetime.now()
-
-        # This is the reference start date for the 366-day contribution data window.
-        # Week indices for month labels are calculated relative to this date.
         data_period_start_ref_date = current_date - timedelta(days=366)
 
-        # Determine the first month for the labels:
-        # This will be the month of (current_date - 1 year), set to the 1st day.
-        # e.g., if current_date is July 15, 2024, month_iterator_start_date is July 1, 2023.
-        month_iterator_start_date = current_date.replace(
-            day=1, year=current_date.year - 1
+        # Chart always starts on Sunday, so get the first Sunday
+        chart_start = (
+            data_period_start_ref_date
+            - timedelta(days=data_period_start_ref_date.weekday() + 1)
+            if data_period_start_ref_date.weekday() != 6
+            else data_period_start_ref_date
         )
 
-        # Determine the last month for the labels:
-        # This will be the current month, set to the 1st day.
-        # e.g., if current_date is July 15, 2024, month_iterator_end_date is July 1, 2024.
-        month_iterator_end_date = current_date.replace(day=1)
+        # For each month in the visible period
+        month = chart_start.replace(day=1)
+        end_month = current_date.replace(day=1)
 
-        month_iterator_dt = month_iterator_start_date
+        months_tmp = []
+        while month <= end_month:
+            # Find week index for the 1st of this month
+            days_offset = (month - chart_start).days
+            week_index = days_offset // 7
 
-        # Using months_seen to prevent duplicates, though the loop logic should be precise.
-        months_seen = set()
+            months_tmp.append(
+                {
+                    "name": month.strftime("%b"),
+                    "week_index": week_index,
+                }
+            )
 
-        while month_iterator_dt <= month_iterator_end_date:
-            month_key = month_iterator_dt.strftime("%b %Y")  # e.g., "Jul 2023"
-
-            if month_key not in months_seen:
-                # Calculate the approximate week index for this month's label.
-                # This is the number of weeks from data_period_start_ref_date to the current month_iterator_dt.
-                # month_iterator_dt is already the 1st of the month.
-                days_offset = (month_iterator_dt - data_period_start_ref_date).days
-                week_index = max(0, days_offset // 7)
-
-                self.months.append(
-                    {
-                        "name": month_iterator_dt.strftime("%b"),  # e.g., "Jul"
-                        "week_index": week_index,
-                    }
-                )
-                months_seen.add(month_key)
-
-            # Advance to the first day of the next month
-            if month_iterator_dt.month == 12:
-                month_iterator_dt = month_iterator_dt.replace(
-                    year=month_iterator_dt.year + 1, month=1
-                )
+            # Next month
+            if month.month == 12:
+                month = month.replace(year=month.year + 1, month=1)
             else:
-                month_iterator_dt = month_iterator_dt.replace(
-                    month=month_iterator_dt.month + 1
-                )
+                month = month.replace(month=month.month + 1)
 
-        # This loop structure is designed to produce exactly 13 month labels
-        # (e.g., from July 1, 2023, to July 1, 2024, inclusive).
-        # The previous logic to trim self.months to a fixed size is no longer needed.
+        # Filter to prevent label overlaps
+        filtered_months = []
+        last_week = -min_weeks_between_labels
+        for month in months_tmp:
+            if month["week_index"] - last_week >= min_weeks_between_labels:
+                filtered_months.append(month)
+                last_week = month["week_index"]
+
+        self.months = filtered_months
 
     @rx.event
     def set_username(self, username: str):
