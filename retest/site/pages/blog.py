@@ -120,20 +120,27 @@ def blog():
                     ),
                     rx.cond(
                         BlogState.posts_count == 0,
-                        rx.card(
-                            rx.vstack(
-                                rx.text("📝", font_size="3rem"),
-                                rx.heading("No blog posts found", size="4"),
-                                rx.text(
-                                    "Add some markdown files to the /public/blog_posts directory to see them here!",
-                                    size="3",
-                                    color_scheme="gray",
-                                    text_align="center",
-                                ),
-                                spacing="3",
-                                align_items="center",
-                                padding="2rem",
-                            )
+                        rx.box(
+                            rx.card(
+                                rx.vstack(
+                                    rx.text("📝", font_size="3rem"),
+                                    rx.heading("No blog posts found", size="4"),
+                                    rx.text(
+                                        "Add some markdown files to the /public/blog_posts directory to see them here!",
+                                        size="3",
+                                        color_scheme="gray",
+                                        text_align="center",
+                                    ),
+                                    spacing="3",
+                                    align_items="center",
+                                    padding="2rem",
+                                )
+                            ),
+                            display="flex",
+                            justify_content="center",
+                            align_items="center",
+                            min_height="300px",
+                            width="100%",
                         ),
                         rx.fragment(),
                     ),
