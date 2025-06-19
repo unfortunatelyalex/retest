@@ -71,6 +71,7 @@ def blog_post() -> rx.Component:
                                 spacing="2",
                                 align_items="center",
                             ),
+                            width="100%",
                             align_items="start",
                             spacing="3",
                             margin_bottom="2rem",
