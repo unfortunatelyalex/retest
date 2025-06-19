@@ -215,7 +215,8 @@ def modern_header() -> rx.Component:
             )
         ),
         width="100%",
-        margin_bottom="3rem",
+        margin_top="2rem",
+        margin_bottom="4rem",
         on_mount=[
             ClockState.start_clock,
             GitHubState.fetch_github_contributions,
@@ -288,13 +289,14 @@ def index():
             # Main stack properties
             spacing="0",
             width="100%",
+            height="100%",
             align_items="center",
         ),
         # Spotify badge widget - floating at bottom right
         spotify_widget.SpotifyWidget(),
         # Viewport container properties
         width="100vw",
-        min_height="100vh",
+        height="100vh",
         padding="2rem",
         background_color=rx.color_mode_cond(
             light=THEME_COLORS["light_bg"], dark=THEME_COLORS["dark_bg"]
