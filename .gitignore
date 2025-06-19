@@ -11,3 +11,4 @@ __pycache__/
 .env
 retest/public/blog_posts/*
 backup
+.github
