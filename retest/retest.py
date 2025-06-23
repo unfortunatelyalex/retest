@@ -2,9 +2,7 @@ import reflex as rx
 
 # Ensure specific import if * is not intended for all
 from retest.site.pages.index import index
-from retest.site.pages.blog import blog
-from retest.site.pages.blog_post import blog_post
-from retest.site.state import SpotifyState, ClockState, BlogPostState
+from retest.site.state import ClockState
 
 # Theme color variables for easy customization
 LIGHT_MODE_BG_COLOR = "#fdf3ea"  # Custom warm cream background
@@ -51,5 +49,3 @@ app.add_page(
     title="Home",
     on_load=[ClockState.start_clock],
 )
-app.add_page(blog, route="/blog", title="Blog")
-app.add_page(blog_post, route="/blog/[slug]", title=BlogPostState.page_title)

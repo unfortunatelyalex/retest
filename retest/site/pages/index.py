@@ -1,11 +1,11 @@
 import reflex as rx
 from retest.site.components import (
     spotify_widget,
-    blog_widget,
     stats_widget,
     about_contact,
 )
 from retest.site.components.github_widget import github_widget
+from retest.site.components.blog_widget import blog_widget
 from retest.site.state import GitHubState, DiscordAvatarState, ClockState
 
 # Theme colors (to avoid circular imports)
@@ -268,9 +268,9 @@ def index():
                     stats_widget.CodingStatsWidget(),
                     grid_column="span 1",
                 ),
-                # Blog Posts Card
+                # Blog Widget Card
                 dashboard_card(
-                    blog_widget.BlogPreviewWidget(),
+                    blog_widget(),
                     grid_column="span 1",
                 ),
                 # Grid properties - 2x2 layout

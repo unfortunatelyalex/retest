@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 import reflex as rx
 from dotenv import load_dotenv
 from typing import Dict, List, Any, Optional
-from .blog_parser import blog_parser
 
 load_dotenv(dotenv_path="/home/alex/retest/.env")
 
@@ -795,84 +794,6 @@ class ClockState(rx.State):
         self.is_running = False
 
 
-class BlogState(rx.State):
-    """State for managing blog posts from markdown files."""
-
-    posts: List[Dict] = []
-    tags: List[str] = []
-    loading: bool = False
-    error_message: str = ""
-
-    @rx.event
-    def load_posts(self):
-        """Load all blog posts using the new blog parser."""
-        self.loading = True
-        self.error_message = ""
-        
-        try:
-            # Use the global blog parser instance
-            self.posts = blog_parser.load_all_posts(force_reload=True)
-            self.tags = blog_parser.get_all_tags()
-        except Exception as e:
-            self.error_message = f"Error loading blog posts: {e}"
-            print(f"Error loading blog posts: {e}")
-        finally:
-            self.loading = False
-
-    @rx.var
-    def posts_with_preferred_date(self) -> List[Dict]:
-        """Get posts with preferred date (last_modified if available, otherwise date)."""
-        posts_with_date = []
-        for post in self.posts:
-            post_copy = post.copy()
-            # Use last_modified if available, otherwise fall back to date
-            preferred_date = post_copy.get("last_modified") or post_copy.get("date", "")
-            post_copy["preferred_date"] = preferred_date
-            posts_with_date.append(post_copy)
-        return posts_with_date
-
-    @rx.var
-    def preview_posts(self) -> List[Dict]:
-        """Get only the first 3 posts for preview."""
-        return self.posts[:3]
-
-    @rx.var
-    def has_more_posts(self) -> bool:
-        """Check if there are more than 3 posts."""
-        return len(self.posts) > 3
-
-    @rx.var
-    def posts_count(self) -> int:
-        """Get the total number of posts."""
-        return len(self.posts)
-
-    @rx.var
-    def featured_posts(self) -> List[Dict]:
-        """Get all featured posts."""
-        return [post for post in self.posts if post.get('featured', False)]
-
-    @rx.var
-    def recent_posts(self) -> List[Dict]:
-        """Get the 5 most recent posts."""
-        return self.posts[:5]
-
-    def get_post_by_slug(self, slug: str) -> Dict | None:
-        """Get a specific post by slug."""
-        try:
-            return blog_parser.get_post_by_slug(slug)
-        except Exception as e:
-            print(f"Error getting post by slug {slug}: {e}")
-            return None
-
-    def get_posts_by_tag(self, tag: str) -> List[Dict]:
-        """Get all posts with a specific tag."""
-        try:
-            return blog_parser.get_posts_by_tag(tag)
-        except Exception as e:
-            print(f"Error getting posts by tag {tag}: {e}")
-            return []
-
-
 class ContactState(rx.State):
     name: str = ""
     email: str = ""
@@ -964,57 +885,3 @@ class ContactState(rx.State):
         self.name_error = ""
         self.email_error = ""
         self.message_error = ""
-
-
-class BlogPostState(rx.State):
-    """State for an individual blog post page."""
-
-    article_identifier: str = ""
-    post_data: dict = {}
-    loading: bool = False
-    error_message: str = ""
-
-    @rx.event
-    def fetch_article_identifier_on_load(self):
-        """Fetches the slug from router params and loads the post."""
-        self.article_identifier = self.router.page.params.get("slug", "")
-        self.load_post_data()
-
-    def load_post_data(self):
-        """Load the specific post data using the blog parser."""
-        if not self.article_identifier:
-            self.post_data = {}
-            return
-            
-        self.loading = True
-        self.error_message = ""
-        
-        try:
-            post = blog_parser.get_post_by_slug(self.article_identifier)
-            if post:
-                self.post_data = post
-            else:
-                self.post_data = {}
-                self.error_message = f"Blog post '{self.article_identifier}' not found"
-        except Exception as e:
-            self.post_data = {}
-            self.error_message = f"Error loading blog post: {e}"
-            print(f"Error loading blog post {self.article_identifier}: {e}")
-        finally:
-            self.loading = False
-
-    @rx.var
-    def preferred_date(self) -> str:
-        """Get the preferred date for this post (last_modified if available, otherwise date)."""
-        if not self.post_data:
-            return ""
-        last_modified = self.post_data.get("last_modified", "")
-        date = self.post_data.get("date", "")
-        return last_modified if last_modified else date
-
-    @rx.var
-    def page_title(self) -> str:
-        """Returns the page title based on the blog post title."""
-        if self.post_data and "title" in self.post_data:
-            return f"{self.post_data['title']} - Blog"
-        return "Blog Post"
