@@ -1,3 +1,5 @@
 reflex
 requests
 python-dotenv
+pyyaml
+python-frontmatter

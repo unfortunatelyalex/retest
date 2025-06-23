@@ -26,20 +26,39 @@ POSTS = [
 
 def BlogPreviewWidget():
     return rx.vstack(
-        rx.hstack(
-            rx.heading("📜 Latest Posts", size="3", margin_bottom="0.25em"),
-            rx.spacer(),
-            rx.link(
-                rx.icon_button(
-                    rx.icon("external-link", size=14),
-                    variant="ghost",
-                    size="2",
-                    aria_label="View all posts",
+        rx.desktop_only(
+            rx.hstack(
+                rx.heading("📜 Latest Posts", size="3", margin_bottom="0.25em"),
+                rx.spacer(),
+                rx.link(
+                    rx.icon_button(
+                        rx.icon("external-link", size=14),
+                        variant="ghost",
+                        size="2",
+                        aria_label="View all posts",
+                    ),
+                    href="/blog",
                 ),
-                href="/blog",
-            ),
-            align_items="center",
-            width="100%",
+                align_items="center",
+                width="100%",
+            )
+        ),
+        rx.mobile_and_tablet(
+            rx.hstack(
+                rx.heading("📜 Latest Posts", size="3"),
+                rx.spacer(),
+                rx.link(
+                    rx.icon_button(
+                        rx.icon("external-link", size=14),
+                        variant="ghost",
+                        size="2",
+                        aria_label="View all posts",
+                    ),
+                    href="/blog",
+                ),
+                align_items="center",
+                width="100%",
+            )
         ),
         rx.vstack(
             rx.foreach(

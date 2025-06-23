@@ -5,104 +5,199 @@ from retest.site.state import DiscordAvatarState, ContactState
 
 def AboutSection():
     return rx.vstack(
-        rx.heading("About Me", size="5", margin_bottom="0.5em"),
-        rx.text(
-            "Hello! I'm a hobby developer, mostly coding in Python. I don't have much web dev experience, "
-            "so I'm really trying my best to make things user-friendly, the site is a work in progress. "
-            "This dashboard is a place to showcase some of my projects and experiments. "
-            "I enjoy learning and exploring new technologies like Reflex!",
-            line_height="1.6",
-            color_scheme="gray",
-        ),
-        rx.text(
-            "Write me directly at ",
-            rx.link(
-                "alex@alexdot.me",
-                href="mailto:alex@alexdot.me",
-                color_scheme="blue",
-                style={"text_decoration": "underline"},
-            ),
-            line_height="1.6",
-            color_scheme="gray",
-            margin_top="0.5rem",
-        ),
-        rx.hstack(
-            rx.skeleton(
-                rx.avatar(
-                    fallback="A",
-                    src=DiscordAvatarState.avatar_url,
-                    size="6",
-                    radius="full",
-                ),
-                loading=DiscordAvatarState.loading,
-            ),
+        rx.desktop_only(
             rx.vstack(
-                rx.hstack(
-                    rx.link(
-                        rx.icon_button(
-                            rx.icon("github"),
-                            variant="ghost",
-                            size="2",
-                            aria_label="GitHub",
-                        ),
-                        href="https://github.com/unfortunatelyalex",
-                        is_external=True,
-                    ),
-                    rx.link(
-                        rx.icon_button(
-                            rx.icon("linkedin"),
-                            variant="ghost",
-                            size="2",
-                            aria_label="LinkedIn",
-                        ),
-                        href="#",
-                        is_external=True,
-                    ),
-                    rx.link(
-                        rx.icon_button(
-                            rx.icon("twitter"),
-                            variant="ghost",
-                            size="2",
-                            aria_label="Twitter",
-                        ),
-                        href="#",
-                        is_external=True,
-                    ),
-                    spacing="2",
+                rx.heading("About Me", size="5", margin_bottom="0.5em"),
+                rx.text(
+                    "Hello! I'm a hobby developer, mostly coding in Python. I don't have much web dev experience, "
+                    "so I'm really trying my best to make things user-friendly, the site is a work in progress. "
+                    "This dashboard is a place to showcase some of my projects and experiments. "
+                    "I enjoy learning and exploring new technologies like Reflex!",
+                    line_height="1.6",
+                    color_scheme="gray",
                 ),
-                rx.popover.root(
-                    rx.popover.trigger(
-                        rx.button(
-                            rx.icon("download", size=16),
-                            "Download CV",
-                            variant="outline",
-                            size="2",
-                            # on_click=rx.toast.info(
-                            #     "CV download is not implemented yet.",
-                            #     duration=3000,
-                            #     position="top-center",
-                            # ),
-                        ),
-                        # rx.download(
-                        #         url="/cv.pdf", filename="Alex_CV.pdf")
+                rx.text(
+                    "Write me directly at ",
+                    rx.link(
+                        "alex@alexdot.me",
+                        href="mailto:alex@alexdot.me",
+                        color_scheme="blue",
+                        style={"text_decoration": "underline"},
                     ),
-                    rx.popover.content(
-                        rx.flex(
-                            rx.text("CV download is not implemented yet."),
-                            rx.popover.close(
-                                rx.button("Close"),
+                    line_height="1.6",
+                    color_scheme="gray",
+                    margin_top="0.5rem",
+                ),
+                rx.hstack(
+                    rx.skeleton(
+                        rx.avatar(
+                            fallback="A",
+                            src=DiscordAvatarState.avatar_url,
+                            size="6",
+                            radius="full",
+                        ),
+                        loading=DiscordAvatarState.loading,
+                    ),
+                    rx.vstack(
+                        rx.hstack(
+                            rx.link(
+                                rx.icon_button(
+                                    rx.icon("github"),
+                                    variant="ghost",
+                                    size="2",
+                                    aria_label="GitHub",
+                                ),
+                                href="https://github.com/unfortunatelyalex",
+                                is_external=True,
                             ),
-                            direction="column",
-                            spacing="3",
+                            rx.link(
+                                rx.icon_button(
+                                    rx.icon("linkedin"),
+                                    variant="ghost",
+                                    size="2",
+                                    aria_label="LinkedIn",
+                                ),
+                                href="#",
+                                is_external=True,
+                            ),
+                            rx.link(
+                                rx.icon_button(
+                                    rx.icon("twitter"),
+                                    variant="ghost",
+                                    size="2",
+                                    aria_label="Twitter",
+                                ),
+                                href="#",
+                                is_external=True,
+                            ),
+                            spacing="2",
                         ),
+                        rx.popover.root(
+                            rx.popover.trigger(
+                                rx.button(
+                                    rx.icon("download", size=16),
+                                    "Download CV",
+                                    variant="outline",
+                                    size="2",
+                                ),
+                            ),
+                            rx.popover.content(
+                                rx.flex(
+                                    rx.text("CV download is not implemented yet."),
+                                    rx.popover.close(
+                                        rx.button("Close"),
+                                    ),
+                                    direction="column",
+                                    spacing="3",
+                                ),
+                            ),
+                        ),
+                        align_items="start",
+                        spacing="3",
                     ),
+                    align_items="center",
+                    spacing="4",
+                    margin_top="1rem",
                 ),
                 align_items="start",
                 spacing="3",
-            ),
-            align_items="center",
-            spacing="4",
-            margin_top="1rem",
+                width="100%",
+                height="100%",
+            )
+        ),
+        rx.mobile_and_tablet(
+            rx.vstack(
+                rx.heading("About Me", size="5", margin_bottom="0.5em"),
+                rx.text(
+                    "Hello! I'm a hobby developer, mostly coding in Python. I don't have much web dev experience, "
+                    "so I'm really trying my best to make things user-friendly, the site is a work in progress. "
+                    "This dashboard is a place to showcase some of my projects and experiments. "
+                    "I enjoy learning and exploring new technologies like Reflex!",
+                    line_height="1.6",
+                    color_scheme="gray",
+                ),
+                rx.text(
+                    "Write me directly at ",
+                    rx.link(
+                        "alex@alexdot.me",
+                        href="mailto:alex@alexdot.me",
+                        color_scheme="blue",
+                        style={"text_decoration": "underline"},
+                    ),
+                    line_height="1.6",
+                    color_scheme="gray",
+                    margin_top="0.5rem",
+                ),
+                rx.vstack(
+                    rx.skeleton(
+                        rx.avatar(
+                            fallback="A",
+                            src=DiscordAvatarState.avatar_url,
+                            size="5",
+                            radius="full",
+                        ),
+                        loading=DiscordAvatarState.loading,
+                    ),
+                    rx.hstack(
+                        rx.link(
+                            rx.icon_button(
+                                rx.icon("github"),
+                                variant="ghost",
+                                size="2",
+                                aria_label="GitHub",
+                            ),
+                            href="https://github.com/unfortunatelyalex",
+                            is_external=True,
+                        ),
+                        rx.link(
+                            rx.icon_button(
+                                rx.icon("linkedin"),
+                                variant="ghost",
+                                size="2",
+                                aria_label="LinkedIn",
+                            ),
+                            href="#",
+                            is_external=True,
+                        ),
+                        rx.link(
+                            rx.icon_button(
+                                rx.icon("twitter"),
+                                variant="ghost",
+                                size="2",
+                                aria_label="Twitter",
+                            ),
+                            href="#",
+                            is_external=True,
+                        ),
+                        spacing="2",
+                    ),
+                    rx.popover.root(
+                        rx.popover.trigger(
+                            rx.button(
+                                rx.icon("download", size=16),
+                                "Download CV",
+                                variant="outline",
+                                size="2",
+                            ),
+                        ),
+                        rx.popover.content(
+                            rx.flex(
+                                rx.text("CV download is not implemented yet."),
+                                rx.popover.close(
+                                    rx.button("Close"),
+                                ),
+                                direction="column",
+                                spacing="3",
+                            ),
+                        ),
+                    ),
+                    align_items="start",
+                    spacing="3",
+                ),
+                align_items="start",
+                spacing="4",
+                margin_top="1rem",
+            )
         ),
         align_items="start",
         spacing="3",

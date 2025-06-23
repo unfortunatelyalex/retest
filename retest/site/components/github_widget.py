@@ -11,6 +11,24 @@ def real_contribution_grid() -> rx.Component:
     light_colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
     dark_colors = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
 
+    def format_tooltip(day):
+        # Parse date string (YYYY-MM-DD)
+        try:
+            dt = datetime.strptime(day["date"], "%Y-%m-%d")
+            day_num = dt.day
+            # Suffix logic
+            if 10 <= day_num % 100 <= 20:
+                suffix = "th"
+            else:
+                suffix = {1: "st", 2: "nd", 3: "rd"}.get(day_num % 10, "th")
+            month = dt.strftime("%B")
+            count = day["count"]
+            count_str = f"{count} contribution" if count == 1 else f"{count} contributions"
+            return f"{count_str} on {month} {day_num}{suffix}."
+        except Exception:
+            # Fallback to old format
+            return f"{day['count']} contributions on {day['date']}"
+
     return rx.cond(
         GitHubState.contribution_weeks != [],
         rx.flex(
@@ -77,7 +95,7 @@ def real_contribution_grid() -> rx.Component:
                                     "outline_offset": "-1px",
                                 },
                             ),
-                            content=f"{day['count']} contributions on {day['date']}",
+                            content=format_tooltip(day),
                             open=(TooltipState.open_day == day["date"]),
                             on_open_change=lambda value: TooltipState.close_tooltip(
                                 value, day["date"]
@@ -385,105 +403,91 @@ def contribution_chart() -> rx.Component:
 def github_contribution_widget() -> rx.Component:
     """Complete GitHub contribution widget with controls."""
     return rx.box(
-        # Header with user info and refresh button
-        rx.flex(
+        rx.desktop_only(
             rx.flex(
-                rx.cond(
-                    GitHubState.avatar_url != "",
-                    rx.image(
-                        src=GitHubState.avatar_url,
-                        width="24px",
-                        height="24px",
-                        border_radius="50%",
-                        border=rx.color_mode_cond(
-                            light="1px solid rgba(27, 31, 36, 0.15)",
-                            dark="1px solid rgba(48, 54, 61, 0.2)",
-                        ),
-                    ),
-                    rx.box(),
-                ),
                 rx.flex(
-                    rx.link(
-                        f"@{GitHubState.github_username}",
-                        href=f"https://github.com/{GitHubState.github_username}",
-                        font_weight="600",
-                        color=rx.color_mode_cond(
-                            light="rgb(31, 35, 40)", dark="rgb(201, 209, 217)"
+                    rx.cond(
+                        GitHubState.avatar_url != "",
+                        rx.image(
+                            src=GitHubState.avatar_url,
+                            width="24px",
+                            height="24px",
+                            border_radius="50%",
+                            border=rx.color_mode_cond(
+                                light="1px solid rgba(27, 31, 36, 0.15)",
+                                dark="1px solid rgba(48, 54, 61, 0.2)",
+                            ),
                         ),
+                        rx.box(),
                     ),
-                    rx.text(
-                        f"{GitHubState.total_contributions} contributions in the last year",
-                        font_size="14px",
-                        color=rx.color_mode_cond(
-                            light="rgb(101, 109, 118)", dark="rgb(125, 128, 141)"
+                    rx.flex(
+                        rx.link(
+                            f"@{GitHubState.github_username}",
+                            href=f"https://github.com/{GitHubState.github_username}",
+                            font_weight="600",
+                            color=rx.color_mode_cond(
+                                light="rgb(31, 35, 40)", dark="rgb(201, 209, 217)"
+                            ),
                         ),
+                        rx.text(
+                            f"{GitHubState.total_contributions} contributions in the last year",
+                            font_size="14px",
+                            color=rx.color_mode_cond(
+                                light="rgb(101, 109, 118)", dark="rgb(125, 128, 141)"
+                            ),
+                        ),
+                        direction="column",
+                        gap="2px",
                     ),
-                    direction="column",
-                    gap="2px",
+                    align="center",
+                    gap="8px",
                 ),
                 align="center",
-                gap="8px",
-            ),
-            # Input for username and refresh button
-            # rx.flex(
-            #     rx.input(
-            #         placeholder="GitHub username",
-            #         value=GitHubState.github_username,
-            #         on_change=GitHubState.set_username,
-            #         on_blur=GitHubState.fetch_github_contributions,
-            #         auto_complete=False,
-            #         width="150px",
-            #         size="2",
-            #         background=rx.color_mode_cond(
-            #             light="rgba(255, 255, 255, 0.8)",
-            #             dark="rgba(13, 17, 23, 0.8)"
-            #         ),
-            #         border=rx.color_mode_cond(
-            #             light="1px solid rgba(27, 31, 36, 0.15)",
-            #             dark="1px solid rgba(48, 54, 61, 0.4)"
-            #         ),
-            #         color=rx.color_mode_cond(
-            #             light="rgb(31, 35, 40)",
-            #             dark="rgb(201, 209, 217)"
-            #         ),
-            #         _focus={
-            #             "border_color": "rgb(58, 115, 214)",
-            #             "box_shadow": "0 0 0 3px rgba(58, 115, 214, 0.3)"
-            #         }
-            #     ),
-            #     rx.button(
-            #         rx.icon("refresh-cw", size=16),
-            #         on_click=GitHubState.fetch_github_contributions,
-            #         variant="outline",
-            #         size="2",
-            #         disabled=GitHubState.is_loading,
-            #         background=rx.color_mode_cond(
-            #             light="rgba(255, 255, 255, 0.8)",
-            #             dark="rgba(13, 17, 23, 0.8)"
-            #         ),
-            #         border=rx.color_mode_cond(
-            #             light="1px solid rgba(27, 31, 36, 0.15)",
-            #             dark="1px solid rgba(48, 54, 61, 0.4)"
-            #         ),
-            #         color=rx.color_mode_cond(
-            #             light="rgb(31, 35, 40)",
-            #             dark="rgb(201, 209, 217)"
-            #         ),
-            #         cursor="pointer",
-            #         _hover={
-            #             "background": rx.color_mode_cond(
-            #                 light="rgba(246, 248, 250, 0.8)",
-            #                 dark="rgba(48, 54, 61, 0.2)"
-            #             ),
-            #             "border_color": "rgba(58, 115, 214, 0.5)"
-            #         }
-            #     ),
-            #     gap="8px",
-            #     align="center"
-            # ),
-            justify="between",
-            align="center",
-            margin_bottom="16px",
+                margin_bottom="16px",
+            )
+        ),
+        rx.mobile_and_tablet(
+            rx.flex(
+                rx.flex(
+                    rx.cond(
+                        GitHubState.avatar_url != "",
+                        rx.image(
+                            src=GitHubState.avatar_url,
+                            width="20px",
+                            height="20px",
+                            border_radius="50%",
+                            border=rx.color_mode_cond(
+                                light="1px solid rgba(27, 31, 36, 0.15)",
+                                dark="1px solid rgba(48, 54, 61, 0.2)",
+                            ),
+                        ),
+                        rx.box(),
+                    ),
+                    rx.flex(
+                        rx.link(
+                            f"@{GitHubState.github_username}",
+                            href=f"https://github.com/{GitHubState.github_username}",
+                            font_weight="600",
+                            color=rx.color_mode_cond(
+                                light="rgb(31, 35, 40)", dark="rgb(201, 209, 217)"
+                            ),
+                        ),
+                        rx.text(
+                            f"{GitHubState.total_contributions} contributions in the last year",
+                            font_size="12px",
+                            color=rx.color_mode_cond(
+                                light="rgb(101, 109, 118)", dark="rgb(125, 128, 141)"
+                            ),
+                        ),
+                        direction="column",
+                        gap="2px",
+                    ),
+                    align="center",
+                    gap="6px",
+                ),
+                align="center",
+                margin_bottom="12px",
+            )
         ),
         # Contribution chart
         contribution_chart(),

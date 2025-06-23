@@ -43,7 +43,12 @@ def CodingStatsWidget():
     ]
 
     return rx.vstack(
-        rx.heading("Personal Stats", size="4", margin_bottom="0.5em"),
+        rx.desktop_only(
+            rx.heading("Personal Stats", size="4", margin_bottom="0.5em"),
+        ),
+        rx.mobile_and_tablet(
+            rx.heading("Personal Stats", size="3", margin_bottom="0.5em"),
+        ),
         rx.vstack(
             rx.text("Attributes", weight="medium", size="3", margin_bottom="0.5em"),
             *[

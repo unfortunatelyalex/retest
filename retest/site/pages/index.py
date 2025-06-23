@@ -218,7 +218,7 @@ def modern_header() -> rx.Component:
         margin_top="2rem",
         margin_bottom="4rem",
         on_mount=[
-            ClockState.start_clock,
+            # ClockState.start_clock,
             GitHubState.fetch_github_contributions,
             DiscordAvatarState.fetch_discord_avatar,
         ],
@@ -296,7 +296,7 @@ def index():
         spotify_widget.SpotifyWidget(),
         # Viewport container properties
         width="100vw",
-        height="100vh",
+        min_height="100dvh",
         padding="2rem",
         background_color=rx.color_mode_cond(
             light=THEME_COLORS["light_bg"], dark=THEME_COLORS["dark_bg"]
