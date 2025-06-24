@@ -3,6 +3,7 @@ import reflex as rx
 # Ensure specific import if * is not intended for all
 from retest.site.pages.index import index
 from retest.site.pages.blog import blog_page
+from retest.site.pages.blog_post import blog_post_page
 from retest.site.state import ClockState, GitHubState
 
 # Theme color variables for easy customization
@@ -55,5 +56,12 @@ app.add_page(
     blog_page,
     route="/blog",
     title="Blog - Alex's Portfolio",
+    on_load=[ClockState.start_clock],
+)
+
+app.add_page(
+    blog_post_page,
+    route="/blog/[slug]",
+    title="Blog Post - Alex's Portfolio",
     on_load=[ClockState.start_clock],
 )

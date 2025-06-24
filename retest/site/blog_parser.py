@@ -113,6 +113,26 @@ class BlogParser:
             post for post in all_posts if tag.lower() in [t.lower() for t in post.tags]
         ]
 
+    def get_post_by_slug(self, slug: str) -> Optional[BlogPost]:
+        """Get a blog post by its slug (filename without extension)."""
+        file_path = self.blog_posts_dir / f"{slug}.md"
+        if file_path.exists():
+            return self.load_blog_post(file_path)
+        return None
+
+    def get_all_slugs(self) -> List[str]:
+        """Get all available blog post slugs."""
+        slugs = []
+        if not self.blog_posts_dir.exists():
+            return slugs
+        
+        for file_path in self.blog_posts_dir.glob("*.md"):
+            post = self.load_blog_post(file_path)
+            if post and post.published:
+                slugs.append(file_path.stem)
+        
+        return slugs
+
 
 # Create a global instance
 blog_posts_dir = os.path.join(os.path.dirname(__file__), "..", "public", "blog_posts")

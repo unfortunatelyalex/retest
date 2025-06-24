@@ -10,7 +10,7 @@ import reflex as rx
 from dotenv import load_dotenv
 from typing import Dict, List, Any, Optional
 
-load_dotenv(dotenv_path="/home/alex/retest/.env")
+load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
 
 app = rx.App()
 

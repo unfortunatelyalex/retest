@@ -28,105 +28,113 @@ def back_to_home_button() -> rx.Component:
 
 def blog_post_card(post: BlogPost) -> rx.Component:
     """Individual blog post card component."""
-    return rx.card(
-        rx.vstack(
-            # Header with title and date
-            rx.hstack(
-                rx.vstack(
-                    rx.heading(
-                        post.title,
-                        size="5",
-                        weight="bold",
-                        class_name="line-clamp-2",
+    # Extract slug from file path - handle both full paths and filenames
+    from pathlib import Path
+    slug = Path(post.file_path).stem if post.file_path else ""
+    
+    return rx.link(
+        rx.card(
+            rx.vstack(
+                # Header with title and date
+                rx.hstack(
+                    rx.vstack(
+                        rx.heading(
+                            post.title,
+                            size="5",
+                            weight="bold",
+                            class_name="line-clamp-2",
+                        ),
+                        rx.text(
+                            post.formatted_date,
+                            size="2",
+                            color="gray",
+                            weight="medium",
+                        ),
+                        align="start",
+                        spacing="1",
+                        flex="1",
                     ),
+                    rx.cond(
+                        post.featured,
+                        rx.badge(
+                            "Featured",
+                            color_scheme="gold",
+                            variant="soft",
+                            size="2",
+                        ),
+                    ),
+                    align="start",
+                    justify="between",
+                    width="100%",
+                ),
+                # Description
+                rx.text(
+                    post.description,
+                    size="3",
+                    color="gray",
+                    class_name="line-clamp-3",
+                    line_height="1.6",
+                ),
+                # Tags
+                rx.cond(
+                    len(post.tags) > 0,
+                    rx.hstack(
+                        *[
+                            rx.badge(
+                                tag,
+                                variant="soft",
+                                size="1",
+                                color_scheme="blue",
+                            )
+                            for tag in post.tags[:3]  # Show max 3 tags
+                        ],
+                        spacing="2",
+                        wrap="wrap",
+                    ),
+                ),
+                # Footer with author and read more
+                rx.hstack(
                     rx.text(
-                        post.formatted_date,
+                        f"by {post.author}" if post.author else "",
                         size="2",
                         color="gray",
                         weight="medium",
                     ),
-                    align="start",
-                    spacing="1",
-                    flex="1",
-                ),
-                rx.cond(
-                    post.featured,
-                    rx.badge(
-                        "Featured",
-                        color_scheme="gold",
-                        variant="soft",
+                    rx.spacer(),
+                    rx.button(
+                        "Read More",
+                        rx.icon("arrow-right", size=14),
+                        variant="ghost",
                         size="2",
+                        style={
+                            "_hover": {
+                                "background": rx.color("accent", 3),
+                            }
+                        },
                     ),
+                    align="center",
+                    width="100%",
                 ),
+                spacing="4",
                 align="start",
-                justify="between",
                 width="100%",
             ),
-            # Description
-            rx.text(
-                post.description,
-                size="3",
-                color="gray",
-                class_name="line-clamp-3",
-                line_height="1.6",
-            ),
-            # Tags
-            rx.cond(
-                len(post.tags) > 0,
-                rx.hstack(
-                    *[
-                        rx.badge(
-                            tag,
-                            variant="soft",
-                            size="1",
-                            color_scheme="blue",
-                        )
-                        for tag in post.tags[:3]  # Show max 3 tags
-                    ],
-                    spacing="2",
-                    wrap="wrap",
-                ),
-            ),
-            # Footer with author and read more
-            rx.hstack(
-                rx.text(
-                    f"by {post.author}" if post.author else "",
-                    size="2",
-                    color="gray",
-                    weight="medium",
-                ),
-                rx.spacer(),
-                rx.button(
-                    "Read More",
-                    rx.icon("arrow-right", size=14),
-                    variant="ghost",
-                    size="2",
-                    style={
-                        "_hover": {
-                            "background": rx.color("accent", 3),
-                        }
-                    },
-                ),
-                align="center",
-                width="100%",
-            ),
-            spacing="4",
-            align="start",
+            size="3",
+            style={
+                "cursor": "pointer",
+                "_hover": {
+                    "transform": "translateY(-2px)",
+                    "box_shadow": "0 8px 25px rgba(0, 0, 0, 0.15)",
+                    "transition": "all 0.2s ease-in-out",
+                },
+                "transition": "all 0.2s ease-in-out",
+                "border": f"1px solid {rx.color('gray', 4)}",
+            },
             width="100%",
         ),
-        size="3",
-        style={
-            "cursor": "pointer",
-            "_hover": {
-                "transform": "translateY(-2px)",
-                "box_shadow": "0 8px 25px rgba(0, 0, 0, 0.15)",
-                "transition": "all 0.2s ease-in-out",
-            },
-            "transition": "all 0.2s ease-in-out",
-            "border": f"1px solid {rx.color('gray', 4)}",
-        },
+        href=f"/blog/{slug}",
+        underline="none",
         width="100%",
-        # min_height="280px",  # Ensure consistent card height
     )
 
 

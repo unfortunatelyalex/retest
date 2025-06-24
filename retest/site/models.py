@@ -25,7 +25,7 @@ class BlogPost(BaseModel):
     def formatted_date(self) -> str:
         """Format the date for display, trying multiple date formats."""
         # Try to use the date field first, then fall back to last_modified
-        date_str = self.date if self.date else self.last_modified
+        date_str = self.last_modified if self.last_modified else self.date
 
         if not date_str:
             return ""
