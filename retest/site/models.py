@@ -14,22 +14,36 @@ class BlogPost(BaseModel):
     tags: List[str]
     featured: bool = False
     published: bool = True
-    date: str = ""
+    date: str
     author: str = ""
     excerpt: str = ""
     content: str = ""
     file_path: str = ""
+    tag_display: List[str]  # Pre-formatted tag display string
 
     @property
     def formatted_date(self) -> str:
-        """Format the last_modified date for display."""
-        try:
-            date_obj = datetime.strptime(self.last_modified, "%Y-%m-%d")
-            return date_obj.strftime("%B %d, %Y")
-        except ValueError:
-            return self.last_modified
+        """Format the date for display, trying multiple date formats."""
+        # Try to use the date field first, then fall back to last_modified
+        date_str = self.date if self.date else self.last_modified
 
-    @property
-    def tag_display(self) -> str:
-        """Join tags for display."""
-        return ", ".join(self.tags[:3])  # Show first 3 tags
+        if not date_str:
+            return ""
+
+        # Try multiple date formats
+        formats_to_try = [
+            "%Y-%m-%d",  # 2024-12-15
+            "%d.%m.%Y",  # 15.12.2024
+            "%m/%d/%Y",  # 12/15/2024
+            "%B %d, %Y",  # December 15, 2024
+        ]
+
+        for fmt in formats_to_try:
+            try:
+                date_obj = datetime.strptime(date_str, fmt)
+                return date_obj.strftime("%B %d, %Y")
+            except ValueError:
+                continue
+
+        # If no format works, return the original string
+        return date_str

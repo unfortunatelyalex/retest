@@ -24,9 +24,13 @@ class BlogWidgetState(rx.State):
         self.loading = True
         try:
             if self.show_featured_only:
-                self.blog_posts = blog_parser.get_featured_posts()
+                all_posts = blog_parser.get_featured_posts()
             else:
-                self.blog_posts = blog_parser.load_all_posts()
+                all_posts = blog_parser.load_all_posts()
+
+            # Limit to 3 most recent posts for the widget
+            self.blog_posts = all_posts[:3]
+
         except Exception as e:
             print(f"Error loading blog posts: {e}")
             self.blog_posts = []
@@ -85,10 +89,23 @@ def blog_post_card(post: BlogPost) -> rx.Component:
                 # Tags
                 rx.cond(
                     post.tag_display != "",
-                    rx.text(
-                        f"Tags: {post.tag_display}",
-                        size="1",
-                        color=rx.color("blue", 9),
+                    rx.hstack(
+                        rx.text(
+                            "Tags: ",
+                            size="1",
+                            color=rx.color("blue", 9),
+                            # move the text down by 1px
+                            style={"marginTop": "1px"},
+                        ),
+                        rx.foreach(
+                            post.tag_display,
+                            lambda tag: rx.badge(
+                                tag,
+                                size="1",
+                                color_scheme="blue",
+                                variant="soft",
+                            ),
+                        ),
                     ),
                     rx.fragment(),
                 ),
@@ -106,8 +123,8 @@ def blog_post_card(post: BlogPost) -> rx.Component:
                     rx.spacer(),
                     rx.text(
                         post.formatted_date,
-                        size="1",
-                        color=rx.color("gray", 10),
+                        size="2",
+                        color="gray",
                         weight="medium",
                     ),
                     justify="between",
@@ -153,10 +170,23 @@ def blog_post_card(post: BlogPost) -> rx.Component:
                 # Tags (smaller)
                 rx.cond(
                     post.tag_display != "",
-                    rx.text(
-                        f"Tags: {post.tag_display}",
-                        size="1",
-                        color=rx.color("blue", 9),
+                    rx.hstack(
+                        rx.text(
+                            "Tags: ",
+                            size="1",
+                            color=rx.color("blue", 9),
+                            # move the text down by 1px
+                            style={"marginTop": "1px"},
+                        ),
+                        rx.foreach(
+                            post.tag_display,
+                            lambda tag: rx.badge(
+                                tag,
+                                size="1",
+                                color_scheme="blue",
+                                variant="soft",
+                            ),
+                        ),
                     ),
                     rx.fragment(),
                 ),
@@ -173,8 +203,8 @@ def blog_post_card(post: BlogPost) -> rx.Component:
                     ),
                     rx.text(
                         post.formatted_date,
-                        size="1",
-                        color=rx.color("gray", 10),
+                        size="2",
+                        color="gray",
                         weight="medium",
                     ),
                     spacing="1",
@@ -255,6 +285,16 @@ def blog_widget() -> rx.Component:
                         variant="outline",
                         on_click=BlogWidgetState.toggle_featured_filter,
                     ),
+                    rx.link(
+                        rx.button(
+                            "View All Blog Posts",
+                            rx.icon("arrow-right", size=14),
+                            size="2",
+                            variant="soft",
+                        ),
+                        href="/blog",
+                        underline="none",
+                    ),
                     justify="between",
                     align="center",
                     width="100%",
@@ -285,6 +325,18 @@ def blog_widget() -> rx.Component:
                         size="1",
                         variant="outline",
                         on_click=BlogWidgetState.toggle_featured_filter,
+                        width="100%",
+                    ),
+                    rx.link(
+                        rx.button(
+                            "View All Blog Posts",
+                            rx.icon("arrow-right", size=12),
+                            size="1",
+                            variant="soft",
+                            width="100%",
+                        ),
+                        href="/blog",
+                        underline="none",
                         width="100%",
                     ),
                     direction="column",

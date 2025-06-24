@@ -1,5 +1,7 @@
 """Blog frontmatter parser for markdown files."""
 
+import os
+
 from typing import List, Optional
 from pathlib import Path
 import frontmatter
@@ -45,6 +47,23 @@ class BlogParser:
             excerpt_val = metadata.get("excerpt", "")
             excerpt = str(excerpt_val) if excerpt_val else ""
 
+            # Format tags for display
+            tag_display = ""
+            if tags and isinstance(tags, list):
+                valid_tags = [
+                    str(tag).strip() for tag in tags if tag and str(tag).strip()
+                ]
+                # print("Valid tags found:", valid_tags)
+                """
+                returns:
+                Valid tags found: ['Portfolio', 'Reflex', 'Python', 'Web Development', 'I-hate-JS']
+                Valid tags found: ['React', 'JavaScript', 'Frontend', 'Modern Development']
+                Valid tags found: ['Web Development', 'HTML', 'CSS', 'JavaScript', 'Beginner']
+                Valid tags found: ['Python', 'Programming', 'Tips', 'Best Practices']"""
+
+                tag_display = valid_tags[:3]  # Show first 3 valid tags
+                # print("Tag display:", tag_display)
+
             return BlogPost(
                 title=title,
                 description=description,
@@ -57,6 +76,7 @@ class BlogParser:
                 excerpt=excerpt,
                 content=post.content,
                 file_path=str(file_path),
+                tag_display=tag_display,
             )
 
         except Exception as e:
@@ -95,4 +115,5 @@ class BlogParser:
 
 
 # Create a global instance
-blog_parser = BlogParser("/home/alex/retest/retest/public/blog_posts")
+blog_posts_dir = os.path.join(os.path.dirname(__file__), "..", "public", "blog_posts")
+blog_parser = BlogParser(blog_posts_dir)

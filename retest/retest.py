@@ -2,7 +2,8 @@ import reflex as rx
 
 # Ensure specific import if * is not intended for all
 from retest.site.pages.index import index
-from retest.site.state import ClockState
+from retest.site.pages.blog import blog_page
+from retest.site.state import ClockState, GitHubState
 
 # Theme color variables for easy customization
 LIGHT_MODE_BG_COLOR = "#fdf3ea"  # Custom warm cream background
@@ -47,5 +48,12 @@ app.add_page(
     index,
     route="/",
     title="Home",
+    on_load=[ClockState.start_clock, GitHubState.fetch_github_contributions],
+)
+
+app.add_page(
+    blog_page,
+    route="/blog",
+    title="Blog - Alex's Portfolio",
     on_load=[ClockState.start_clock],
 )

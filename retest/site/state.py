@@ -575,6 +575,10 @@ class GitHubState(rx.State):
             for week in calendar["weeks"]:
                 week_data = []
                 for day in week["contributionDays"]:
+                    # Format the tooltip text here during data processing
+                    tooltip_text = self.get_formatted_tooltip(
+                        day["date"], day["contributionCount"]
+                    )
                     week_data.append(
                         {
                             "date": day["date"],
@@ -582,6 +586,7 @@ class GitHubState(rx.State):
                             "level": self._get_contribution_level(
                                 day["contributionCount"]
                             ),
+                            "tooltip": tooltip_text,
                             # Keep original API level for reference
                             "api_level": day["contributionLevel"],
                         }
@@ -671,6 +676,29 @@ class GitHubState(rx.State):
     def set_username(self, username: str):
         """Set the GitHub username."""
         self.github_username = username
+
+    def get_formatted_tooltip(self, date_str: str, count: int) -> str:
+        """Get formatted tooltip for a specific date and count."""
+        try:
+            # Parse date string (YYYY-MM-DD)
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            day_num = dt.day
+
+            # Suffix logic
+            if 10 <= day_num % 100 <= 20:
+                suffix = "th"
+            else:
+                suffix = {1: "st", 2: "nd", 3: "rd"}.get(day_num % 10, "th")
+
+            month = dt.strftime("%B")
+            count_str = (
+                f"{count} contribution" if count == 1 else f"{count} contributions"
+            )
+
+            return f"{count_str} on {month} {day_num}{suffix}"
+        except Exception:
+            # Fallback format
+            return f"{count} contributions on {date_str}"
 
 
 class TooltipState(rx.State):
