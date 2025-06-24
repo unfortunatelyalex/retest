@@ -48,7 +48,7 @@ class BlogParser:
             excerpt = str(excerpt_val) if excerpt_val else ""
 
             # Format tags for display
-            tag_display = ""
+            tag_display: List[str] = []
             if tags and isinstance(tags, list):
                 valid_tags = [
                     str(tag).strip() for tag in tags if tag and str(tag).strip()
