@@ -11,24 +11,6 @@ def real_contribution_grid() -> rx.Component:
     light_colors = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"]
     dark_colors = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
 
-    def format_tooltip(day):
-        # Parse date string (YYYY-MM-DD)
-        try:
-            dt = datetime.strptime(day["date"], "%Y-%m-%d")
-            day_num = dt.day
-            # Suffix logic
-            if 10 <= day_num % 100 <= 20:
-                suffix = "th"
-            else:
-                suffix = {1: "st", 2: "nd", 3: "rd"}.get(day_num % 10, "th")
-            month = dt.strftime("%B")
-            count = day["count"]
-            count_str = f"{count} contribution" if count == 1 else f"{count} contributions"
-            return f"{count_str} on {month} {day_num}{suffix}."
-        except Exception:
-            # Fallback to old format
-            return f"{day['count']} contributions on {day['date']}"
-
     return rx.cond(
         GitHubState.contribution_weeks != [],
         rx.flex(
@@ -95,7 +77,7 @@ def real_contribution_grid() -> rx.Component:
                                     "outline_offset": "-1px",
                                 },
                             ),
-                            content=format_tooltip(day),
+                            content=day["tooltip"],
                             open=(TooltipState.open_day == day["date"]),
                             on_open_change=lambda value: TooltipState.close_tooltip(
                                 value, day["date"]

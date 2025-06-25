@@ -42,7 +42,9 @@ custom_theme = rx.theme(
 # Note: Background color will be applied at the component level for better theme integration
 
 # Create app with toast provider
-app = rx.App(theme=custom_theme, overlay_component=rx.toast.provider())  # Apply the custom theme and add toast provider
+app = rx.App(
+    theme=custom_theme, overlay_component=rx.toast.provider()
+)  # Apply the custom theme and add toast provider
 
 app.add_page(
     index,

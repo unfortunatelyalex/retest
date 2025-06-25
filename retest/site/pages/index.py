@@ -5,7 +5,7 @@ from retest.site.components import (
     about_contact,
 )
 from retest.site.components.github_widget import github_widget
-from retest.site.state import GitHubState, DiscordAvatarState, ClockState
+from retest.site.state import DiscordAvatarState, ClockState
 
 # Theme colors (to avoid circular imports)
 THEME_COLORS = {
@@ -215,10 +215,8 @@ def modern_header() -> rx.Component:
         ),
         width="100%",
         margin_top="2rem",
-        margin_bottom="4rem",
+        margin_bottom="2rem",
         on_mount=[
-            # ClockState.start_clock,
-            GitHubState.fetch_github_contributions,
             DiscordAvatarState.fetch_discord_avatar,
         ],
     )
