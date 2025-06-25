@@ -2,9 +2,7 @@ import reflex as rx
 
 # Ensure specific import if * is not intended for all
 from retest.site.pages.index import index
-from retest.site.pages.blog import blog_page
-from retest.site.pages.blog_post import blog_post_page
-from retest.site.state import ClockState, GitHubState
+from retest.site.state import ClockState
 
 # Theme color variables for easy customization
 LIGHT_MODE_BG_COLOR = "#fdf3ea"  # Custom warm cream background
@@ -43,25 +41,16 @@ custom_theme = rx.theme(
 # Theme configuration with custom colors
 # Note: Background color will be applied at the component level for better theme integration
 
-app = rx.App(theme=custom_theme)  # Apply the custom theme
+# Create app with toast provider
+app = rx.App(
+    theme=custom_theme, overlay_component=rx.toast.provider()
+)  # Apply the custom theme and add toast provider
 
 app.add_page(
     index,
     route="/",
     title="Home",
-    on_load=[ClockState.start_clock, GitHubState.fetch_github_contributions],
-)
-
-app.add_page(
-    blog_page,
-    route="/blog",
-    title="Blog - Alex's Portfolio",
-    on_load=[ClockState.start_clock],
-)
-
-app.add_page(
-    blog_post_page,
-    route="/blog/[slug]",
-    title="Blog Post - Alex's Portfolio",
-    on_load=[ClockState.start_clock],
+    on_load=[
+        ClockState.start_clock,
+    ],
 )

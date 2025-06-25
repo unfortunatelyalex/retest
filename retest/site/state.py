@@ -8,7 +8,48 @@ import re
 from datetime import datetime, timedelta
 import reflex as rx
 from dotenv import load_dotenv
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Literal
+
+
+class ToastState(rx.State):
+    """State for managing toast notifications."""
+
+    @staticmethod
+    def show_error(
+        title: str = "Error",
+        description: str = "An error occurred",
+        position: Literal[
+            "top-left",
+            "top-center",
+            "top-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+        ] = "top-center",
+        duration: int = 5000,
+        variant: Literal["default", "success", "error", "warning", "info"] = "error",
+    ) -> rx.event.EventSpec:
+        """Show an error toast notification.
+
+        Args:
+            title: The title of the toast
+            description: The message to display
+            position: Position of the toast on screen
+            duration: Duration in milliseconds before the toast disappears
+            variant: The style variant of the toast
+
+        Returns:
+            EventSpec: The toast event
+        """
+        return rx.toast(
+            title=title,
+            description=description,
+            position=position,
+            duration=duration,
+            variant=variant,
+            close_button=True,
+        )
+
 
 load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
 
@@ -238,26 +279,27 @@ class SpotifyState(rx.State):
                         self.song_url = ""
                         self.artist_url = ""
                         self.last_update_time = current_time
-                except:
-                    pass
+                except Exception as e:
+                    return ToastState.show_error(
+                        title="Spotify Error",
+                        description=f"Failed to update track state: {str(e)}",
+                        position="top-center",
+                    )
                 return
 
             response.raise_for_status()
             data = response.json()
 
             if not data.get("item"):
-                try:
-                    async with self:
-                        self.current_track = "No track data"
-                        self.current_cover_url = "/placeholder_cover.png"
-                        self.is_playing = False
-                        self.progress_ms = 0
-                        self.duration_ms = 0
-                        self.song_url = ""
-                        self.artist_url = ""
-                        self.last_update_time = current_time
-                except:
-                    pass
+                async with self:
+                    self.current_track = "No track data"
+                    self.current_cover_url = "/placeholder_cover.png"
+                    self.is_playing = False
+                    self.progress_ms = 0
+                    self.duration_ms = 0
+                    self.song_url = ""
+                    self.artist_url = ""
+                    self.last_update_time = current_time
                 return
 
             # Extract track information
@@ -300,8 +342,12 @@ class SpotifyState(rx.State):
                     self.song_url = song_url
                     self.artist_url = artist_url
                     self.last_update_time = current_time  # Record when we got this data
-            except:
-                pass
+            except Exception as e:
+                return ToastState.show_error(
+                    title="Spotify Error",
+                    description=f"Failed to update track state: {str(e)}",
+                    position="top-center",
+                )
 
         except requests.exceptions.RequestException as e:
             if (
@@ -314,11 +360,19 @@ class SpotifyState(rx.State):
                     async with self:
                         self.spotify_access_token = ""
                         self.spotify_token_expires_at = 0
-                except:
-                    pass
+                except Exception as e:
+                    return ToastState.show_error(
+                        title="Spotify Error",
+                        description=f"Failed to update track state: {str(e)}",
+                        position="top-center",
+                    )
 
         except Exception as e:
-            pass
+            return ToastState.show_error(
+                title="Spotify Error",
+                description=f"Failed to update track info: {str(e)}",
+                position="top-center",
+            )
 
     @rx.event
     async def fetch_current_track(self):
@@ -736,14 +790,20 @@ class DiscordAvatarState(rx.State):
         try:
             # Check if required environment variables are set
             if not self.user_id or not self.guild_id:
-                print("DC_UID or DC_GID environment variables not found")
-                return
+                return ToastState.show_error(
+                    title="Discord Error",
+                    description="Discord user ID or guild ID not configured",
+                    position="top-center",
+                )
 
             # Get Discord bot token from environment
             discord_token = os.getenv("DC_TOKEN")
             if not discord_token:
-                print("DC_TOKEN environment variable not found")
-                return
+                return ToastState.show_error(
+                    title="Discord Error",
+                    description="Discord bot token not configured",
+                    position="top-center",
+                )
 
             headers = {
                 "Authorization": f"Bot {discord_token}",
@@ -772,12 +832,18 @@ class DiscordAvatarState(rx.State):
                             default_avatar_index = int(discriminator) % 5
                         self.avatar_url = f"https://cdn.discordapp.com/embed/avatars/{default_avatar_index}.png"
                 else:
-                    print(
-                        f"Discord API error: {response.status_code} - {response.text}"
+                    return ToastState.show_error(
+                        title="Discord API Error",
+                        description=f"Failed to fetch user data: {response.status_code}",
+                        position="top-center",
                     )
 
         except Exception as e:
-            print(f"Error fetching Discord avatar: {e}")
+            return ToastState.show_error(
+                title="Discord Error",
+                description=f"Failed to fetch Discord avatar: {str(e)}",
+                position="top-center",
+            )
             # Keep fallback avatar on error
         finally:
             # Always set loading to False when done
