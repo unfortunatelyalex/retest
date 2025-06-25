@@ -9,6 +9,8 @@ __pycache__/
 .vscode
 .git
 .env
+.logs
 retest/public/blog_posts/*
 backup
 .github
+.windsurf
