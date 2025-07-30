@@ -1,316 +1,323 @@
 import reflex as rx
+from retest.site.components.page_layout import page_layout
 from retest.site.components import (
     spotify_widget,
     stats_widget,
-    about_contact,
+    github_widget,
 )
-from retest.site.components.github_widget import github_widget
 from retest.site.state import DiscordAvatarState, ClockState
 
-# Theme colors (to avoid circular imports)
-THEME_COLORS = {
-    "light_bg": "#fdf3ea",  # Custom warm cream background
-    "dark_bg": "#0a0a0a",  # Deep dark background
-}
 
-
-def theme_toggle_button() -> rx.Component:
-    return rx.icon_button(
-        rx.cond(
-            rx.color_mode == "light",
-            rx.icon(tag="sun"),
-            rx.icon(tag="moon"),
+def introduction_section() -> rx.Component:
+    """Introduction section with profile and overview."""
+    return rx.vstack(
+        # Profile header with avatar and intro
+        rx.hstack(
+            rx.skeleton(
+                rx.avatar(
+                    fallback="A", 
+                    src=DiscordAvatarState.avatar_url,
+                    size="7",
+                    radius="full",
+                    style={
+                        "border": f"3px solid {rx.color('accent', 6)}",
+                        "transition": "transform 0.3s ease",
+                        "_hover": {"transform": "scale(1.05)"}
+                    }
+                ),
+                loading=DiscordAvatarState.loading
+            ),
+            rx.vstack(
+                rx.heading(
+                    "Alex's Portfolio",
+                    size="7",
+                    weight="bold",
+                    color=rx.color("gray", 12)
+                ),
+                rx.text(
+                    "Full-Stack Developer & Data Enthusiast",
+                    size="4",
+                    color=rx.color("accent", 11),
+                    weight="medium"
+                ),
+                rx.text(
+                    "Building innovative web applications and exploring the intersection of technology and creativity.",
+                    size="3",
+                    color=rx.color("gray", 10),
+                    line_height="1.6"
+                ),
+                align_items="start",
+                spacing="2"
+            ),
+            align_items="center",
+            spacing="6",
+            width="100%",
+            margin_bottom="8"
         ),
-        on_click=rx.toggle_color_mode,
-        radius="full",
-        variant="soft",
-        size="3",
-        aria_label="Toggle theme",
-        style={
-            "_hover": {
-                "transform": "scale(1.1)",
-                "transition": "transform 0.2s ease-in-out",
-            }
-        },
+        
+        # Overview text
+        rx.vstack(
+            rx.text(
+                "Welcome to my digital portfolio! I'm a passionate developer with expertise in Python, web development, and data science. This site showcases my projects, skills, and thoughts on technology.",
+                size="3",
+                color=rx.color("gray", 11),
+                line_height="1.7",
+                margin_bottom="4"
+            ),
+            rx.text(
+                "I specialize in building scalable web applications using modern frameworks like Reflex, React, and FastAPI. When I'm not coding, you'll find me exploring new technologies, contributing to open source projects, or sharing knowledge through blog posts.",
+                size="3", 
+                color=rx.color("gray", 11),
+                line_height="1.7",
+                margin_bottom="6"
+            ),
+            align_items="start",
+            width="100%"
+        ),
+        
+        align_items="start",
+        width="100%",
+        id="overview"
     )
 
 
-def modern_header() -> rx.Component:
-    """Modern centered header at the top of the dashboard"""
-    return rx.box(
-        # Desktop layout - horizontal with full text
-        rx.desktop_only(
-            rx.vstack(
-                rx.hstack(
-                    # Left side: Avatar and greeting
-                    rx.hstack(
-                        rx.skeleton(
-                            rx.avatar(
-                                fallback="A",
-                                src=DiscordAvatarState.avatar_url,
-                                size="5",
-                                radius="full",
-                                style={
-                                    "transition": "transform 0.3s ease",
-                                    "_hover": {"transform": "scale(1.1)"},
-                                },
-                            ),
-                            loading=DiscordAvatarState.loading,
-                        ),
-                        rx.vstack(
-                            rx.hstack(
-                                rx.heading("Hello, I'm Alex", size="8", weight="bold"),
-                                rx.text(
-                                    "👋",
-                                    font_size="2rem",
-                                    style={
-                                        "animation": "wave 1s ease-in-out infinite alternate",
-                                        "@keyframes wave": {
-                                            "0%": {"transform": "rotate(0deg)"},
-                                            "100%": {"transform": "rotate(20deg)"},
-                                        },
-                                    },
-                                ),
-                                align_items="center",
-                                spacing="3",
-                            ),
-                            rx.hstack(
-                                rx.text(
-                                    "Welcome to my portfolio dashboard!",
-                                    size="5",
-                                    color_scheme="gray",
-                                ),
-                                rx.text("•", color_scheme="gray", size="5"),
-                                rx.text(
-                                    ClockState.current_time,
-                                    size="5",
-                                    weight="medium",
-                                    color_scheme="blue",
-                                    style={
-                                        "font_variant_numeric": "tabular-nums",
-                                        "letter_spacing": "0.05em",
-                                    },
-                                ),
-                                align_items="center",
-                                spacing="3",
-                            ),
-                            align_items="start",
-                            spacing="2",
-                        ),
-                        align_items="center",
-                        spacing="4",
-                    ),
-                    rx.spacer(),
-                    # Right side: Theme toggle and status
-                    rx.hstack(
-                        rx.cond(
-                            ClockState.is_running,
-                            rx.badge(
-                                "Live", variant="soft", color_scheme="green", size="2"
-                            ),
-                            rx.badge(
-                                "Stopped", variant="soft", color_scheme="gray", size="2"
-                            ),
-                        ),
-                        theme_toggle_button(),
-                        align_items="center",
-                        spacing="3",
-                    ),
-                    align_items="center",
-                    # width="100%",
-                    spacing="4",
-                ),
-                align_items="center",
-                width="100%",
-                spacing="3",
-            )
+def quick_stats_section() -> rx.Component:
+    """Quick stats and current activity section."""
+    return rx.vstack(
+        rx.heading(
+            "Current Activity", 
+            size="5",
+            margin_bottom="4",
+            color=rx.color("gray", 12),
+            id="activity"
         ),
-        # Mobile/Tablet layout - compact vertical layout
-        rx.mobile_and_tablet(
-            rx.vstack(
-                # Main content - avatar and greeting
+        
+        # Stats grid
+        rx.grid(
+            # GitHub Activity Widget
+            rx.card(
+                github_widget(),
+                size="3",
+                style={
+                    "background_color": rx.color("gray", 2, alpha=True),
+                    "border": f"1px solid {rx.color('gray', 4)}"
+                }
+            ),
+            
+            # Personal Stats Widget  
+            rx.card(
+                stats_widget.CodingStatsWidget(),
+                size="3",
+                style={
+                    "background_color": rx.color("gray", 2, alpha=True),
+                    "border": f"1px solid {rx.color('gray', 4)}"
+                }
+            ),
+            
+            columns=rx.breakpoints({"0px": "1", "768px": "2"}),
+            spacing="4",
+            width="100%"
+        ),
+        
+        align_items="start",
+        width="100%",
+        margin_top="8"
+    )
+
+
+def featured_projects_section() -> rx.Component:
+    """Featured projects preview section."""
+    return rx.vstack(
+        rx.heading(
+            "Featured Projects",
+            size="5", 
+            margin_bottom="4",
+            color=rx.color("gray", 12),
+            id="projects"
+        ),
+        
+        rx.grid(
+            # Project cards
+            rx.card(
                 rx.vstack(
                     rx.hstack(
-                        rx.skeleton(
-                            rx.avatar(
-                                fallback="A",
-                                src=DiscordAvatarState.avatar_url,
-                                size="4",  # Smaller on mobile
-                                radius="full",
-                                style={
-                                    "transition": "transform 0.3s ease",
-                                    "_hover": {"transform": "scale(1.1)"},
-                                },
-                            ),
-                            loading=DiscordAvatarState.loading,
-                        ),
-                        rx.vstack(
-                            rx.hstack(
-                                # Smaller heading
-                                rx.heading("Hello, I'm Alex", size="6", weight="bold"),
-                                rx.text(
-                                    "👋",
-                                    font_size="1.5rem",  # Smaller wave
-                                    style={
-                                        "animation": "wave 1s ease-in-out infinite alternate",
-                                        "@keyframes wave": {
-                                            "0%": {"transform": "rotate(0deg)"},
-                                            "100%": {"transform": "rotate(20deg)"},
-                                        },
-                                    },
-                                ),
-                                align_items="center",
-                                spacing="2",
-                            ),
-                            rx.text(
-                                "Welcome to my portfolio!",  # Shorter text
-                                size="3",  # Smaller size
-                                color_scheme="gray",
-                                text_align="start",
-                                style={
-                                    "animation": "fadeIn 1s ease-in-out 0.5s both",
-                                },
-                            ),
-                            align_items="start",
-                            spacing="1",
-                        ),
+                        rx.icon(tag="globe", size=20, color=rx.color("accent", 11)),
+                        rx.heading("Portfolio Website", size="3"),
                         align_items="center",
-                        spacing="3",
+                        spacing="2"
                     ),
-                    # Clock and status in separate row
+                    rx.text(
+                        "This very website! Built with Reflex framework, featuring responsive design and modern UI components.",
+                        size="2",
+                        color=rx.color("gray", 10),
+                        line_height="1.6"
+                    ),
                     rx.hstack(
-                        rx.text(
-                            ClockState.current_time,
-                            size="4",
-                            weight="medium",
-                            color_scheme="blue",
-                            style={
-                                "font_variant_numeric": "tabular-nums",
-                                "letter_spacing": "0.05em",
-                                "animation": "fadeIn 1s ease-in-out 0.5s both",
-                            },
-                        ),
-                        rx.spacer(),
-                        rx.cond(
-                            ClockState.is_running,
-                            rx.badge(
-                                "Live", variant="soft", color_scheme="green", size="1"
-                            ),
-                            rx.badge(
-                                "Stopped", variant="soft", color_scheme="gray", size="1"
-                            ),
-                        ),
-                        theme_toggle_button(),
-                        align_items="center",
-                        width="100%",
-                        spacing="2",
+                        rx.badge("Reflex", variant="soft", color_scheme="blue"),
+                        rx.badge("Python", variant="soft", color_scheme="green"),
+                        rx.badge("Responsive", variant="soft", color_scheme="purple"),
+                        spacing="2"
                     ),
                     align_items="start",
-                    spacing="3",
-                    # width="100%",
+                    spacing="3"
                 ),
-                align_items="center",
-                spacing="2",
-            )
+                size="3",
+                style={
+                    "background_color": rx.color("gray", 2, alpha=True),
+                    "border": f"1px solid {rx.color('gray', 4)}",
+                    "_hover": {
+                        "border_color": rx.color("accent", 6),
+                        "transition": "border-color 0.2s ease"
+                    }
+                }
+            ),
+            
+            rx.card(
+                rx.vstack(
+                    rx.hstack(
+                        rx.icon(tag="database", size=20, color=rx.color("accent", 11)),
+                        rx.heading("Data Analytics Dashboard", size="3"),
+                        align_items="center", 
+                        spacing="2"
+                    ),
+                    rx.text(
+                        "Interactive dashboard for analyzing large datasets with real-time visualizations and automated reporting.",
+                        size="2",
+                        color=rx.color("gray", 10),
+                        line_height="1.6"
+                    ),
+                    rx.hstack(
+                        rx.badge("FastAPI", variant="soft", color_scheme="red"),
+                        rx.badge("Pandas", variant="soft", color_scheme="orange"), 
+                        rx.badge("Plotly", variant="soft", color_scheme="blue"),
+                        spacing="2"
+                    ),
+                    align_items="start",
+                    spacing="3"
+                ),
+                size="3",
+                style={
+                    "background_color": rx.color("gray", 2, alpha=True),
+                    "border": f"1px solid {rx.color('gray', 4)}",
+                    "_hover": {
+                        "border_color": rx.color("accent", 6),
+                        "transition": "border-color 0.2s ease"
+                    }
+                }
+            ),
+            
+            columns=rx.breakpoints({"0px": "1", "768px": "2"}),
+            spacing="4",
+            width="100%"
         ),
+        
+        rx.link(
+            rx.button(
+                "View All Projects",
+                rx.icon(tag="arrow-right", size=16),
+                variant="outline",
+                size="3",
+                style={
+                    "margin_top": "1rem",
+                    "_hover": {
+                        "background_color": rx.color("accent", 3),
+                        "border_color": rx.color("accent", 6)
+                    }
+                }
+            ),
+            href="/projects"
+        ),
+        
+        align_items="start",
         width="100%",
-        margin_top="2rem",
-        margin_bottom="2rem",
-        on_mount=[
-            DiscordAvatarState.fetch_discord_avatar,
-        ],
+        margin_top="8"
     )
 
 
-def dashboard_card(component: rx.Component, **kwargs) -> rx.Component:
-    """Wrapper for consistent card styling across all widgets"""
-    return rx.card(
-        component,
-        style={
-            "transition": "transform 0.2s ease, box-shadow 0.2s ease",
-            "_hover": {
-                "transform": "translateY(-4px)",
-                "box_shadow": "0 12px 32px rgba(0,0,0,0.12)",
-            },
-            "box_shadow": "0 4px 16px rgba(0,0,0,0.06)",
-            "border": "1px solid",
-            "border_color": rx.color("gray", 4),
-            "background": rx.color("gray", 1),
-        },
-        size="4",
-        **kwargs,
+def get_in_touch_section() -> rx.Component:
+    """Get in touch section."""
+    return rx.vstack(
+        rx.heading(
+            "Get in Touch",
+            size="5",
+            margin_bottom="4", 
+            color=rx.color("gray", 12),
+            id="contact"
+        ),
+        
+        rx.text(
+            "I'm always interested in new opportunities and collaborations. Feel free to reach out if you'd like to work together or just chat about technology!",
+            size="3",
+            color=rx.color("gray", 10),
+            line_height="1.7",
+            margin_bottom="4"
+        ),
+        
+        rx.hstack(
+            rx.link(
+                rx.button(
+                    rx.icon(tag="mail", size=16),
+                    "Contact Me",
+                    variant="solid",
+                    size="3"
+                ),
+                href="/contact"
+            ),
+            rx.link(
+                rx.button(
+                    rx.icon(tag="github", size=16),
+                    "GitHub",
+                    variant="outline", 
+                    size="3"
+                ),
+                href="https://github.com/unfortunatelyalex",
+                is_external=True
+            ),
+            spacing="3"
+        ),
+        
+        align_items="start",
+        width="100%",
+        margin_top="8"
     )
 
 
 def index():
+    """Main portfolio homepage with OpenAuth-inspired layout."""
+    
+    # Define sections for "On this page" navigation
+    page_sections = [
+        {"title": "Overview", "href": "#overview"},
+        {"title": "Current Activity", "href": "#activity"}, 
+        {"title": "Featured Projects", "href": "#projects"},
+        {"title": "Get in Touch", "href": "#contact"}
+    ]
+    
+    # Page content
+    content = rx.vstack(
+        introduction_section(),
+        quick_stats_section(), 
+        featured_projects_section(),
+        get_in_touch_section(),
+        spacing="9",
+        align_items="start",
+        width="100%"
+    )
+    
     return rx.box(
-        # Main container with viewport dimensions and margins
-        rx.vstack(
-            # Centered header
-            modern_header(),
-            # Main dashboard grid - 2x2 layout
-            rx.grid(
-                # About Me Card
-                dashboard_card(
-                    about_contact.AboutSection(),
-                    grid_column="span 1",
-                ),
-                # GitHub Activity Card
-                dashboard_card(
-                    github_widget(),
-                    grid_column="span 1",
-                ),
-                # Coding Stats Card
-                dashboard_card(
-                    stats_widget.CodingStatsWidget(),
-                    grid_column="span 1",
-                ),
-                # Grid properties - 2x2 layout
-                grid_template_columns=rx.breakpoints(
-                    {"0px": "1fr", "950px": "repeat(2, 1fr)"}
-                ),
-                # [
-                #     "1fr",  # Mobile: single column
-                #     "repeat(2, 1fr)",  # Tablet and up: 2 columns
-                # ],
-                gap="1.5rem",
-                width="88%",
-                auto_flow="row",
-                align_items="start",
-            ),
-            # Main stack properties
-            spacing="0",
-            width="100%",
-            height="100%",
-            align_items="center",
+        page_layout(
+            content=content,
+            title="Introduction",
+            on_page_sections=page_sections,
+            max_width="4xl"
         ),
-        # Spotify badge widget - floating at bottom right
+        
+        # Floating Spotify widget (preserved from original)
         spotify_widget.SpotifyWidget(),
-        # Viewport container properties
-        width="100vw",
-        min_height="100dvh",
-        padding="2rem",
-        background_color=rx.color_mode_cond(
-            light=THEME_COLORS["light_bg"], dark=THEME_COLORS["dark_bg"]
-        ),
-        style={
-            # "@media (max-width: 768px)": {"padding": "1rem"},
-            "@keyframes fadeIn": {
-                "0%": {"opacity": "0", "transform": "translateY(20px)"},
-                "100%": {"opacity": "1", "transform": "translateY(0)"},
-            },
-            "@keyframes wave": {
-                "0%": {"transform": "rotate(0deg)"},
-                "100%": {"transform": "rotate(20deg)"},
-            },
-            "@keyframes blink": {
-                "0%, 50%": {"opacity": "1"},
-                "51%, 100%": {"opacity": "0.3"},
-            },
-            "@keyframes pulse": {
-                "0%": {"transform": "scale(1)"},
-                "50%": {"transform": "scale(1.05)"},
-                "100%": {"transform": "scale(1)"},
-            },
-        },
+        
+        # Page initialization
+        on_mount=[
+            DiscordAvatarState.fetch_discord_avatar,
+            ClockState.start_clock,
+        ]
     )

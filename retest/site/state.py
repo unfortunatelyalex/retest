@@ -51,6 +51,27 @@ class ToastState(rx.State):
         )
 
 
+class SidebarState(rx.State):
+    """State for managing sidebar navigation."""
+    
+    is_open: bool = False
+    
+    @rx.event
+    def open_sidebar(self):
+        """Open the sidebar (primarily for mobile)."""
+        self.is_open = True
+    
+    @rx.event  
+    def close_sidebar(self):
+        """Close the sidebar."""
+        self.is_open = False
+    
+    @rx.event
+    def toggle_sidebar(self):
+        """Toggle sidebar visibility."""
+        self.is_open = not self.is_open
+
+
 load_dotenv(dotenv_path="/home/ubuntu/retest/.env")
 
 app = rx.App()

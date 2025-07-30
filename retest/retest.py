@@ -1,11 +1,14 @@
 import reflex as rx
 
-# Ensure specific import if * is not intended for all
+# Import all pages
 from retest.site.pages.index import index
+from retest.site.pages.about import about
+from retest.site.pages.projects import projects
+from retest.site.pages.contact import contact
 from retest.site.state import ClockState
 
 # Theme color variables for easy customization
-LIGHT_MODE_BG_COLOR = "#fdf3ea"  # Custom warm cream background
+LIGHT_MODE_BG_COLOR = "#fafafa"  # Clean light background
 DARK_MODE_BG_COLOR = "#0a0a0a"  # Deep dark background
 ACCENT_COLOR = "sky"  # Primary accent color
 GRAY_COLOR = "slate"  # Gray tone for better contrast
@@ -38,19 +41,36 @@ custom_theme = rx.theme(
     radius="medium",
 )
 
-# Theme configuration with custom colors
-# Note: Background color will be applied at the component level for better theme integration
-
 # Create app with toast provider
 app = rx.App(
-    theme=custom_theme, overlay_component=rx.toast.provider()
-)  # Apply the custom theme and add toast provider
+    theme=custom_theme, 
+    overlay_component=rx.toast.provider()
+)
 
+# Add all pages to the app
 app.add_page(
     index,
     route="/",
-    title="Home",
+    title="Introduction - Alex's Portfolio",
     on_load=[
         ClockState.start_clock,
     ],
+)
+
+app.add_page(
+    about,
+    route="/about",
+    title="About Me - Alex's Portfolio",
+)
+
+app.add_page(
+    projects,
+    route="/projects",
+    title="Projects - Alex's Portfolio",
+)
+
+app.add_page(
+    contact,
+    route="/contact",
+    title="Contact - Alex's Portfolio",
 )
