@@ -6,40 +6,63 @@ from ..styles import get_sidebar_styles, LAYOUT
 
 def nav_item(icon: str, text: str, href: str, is_active, indent: int = 0) -> rx.Component:
     """Create a navigation item for the sidebar."""
-    margin_left = f"{indent * 20}px" if indent > 0 else "0px"
+    padding_left = f"{12 + (indent * 20)}px" if indent > 0 else "12px"
     
     return rx.link(
         rx.flex(
-            rx.icon(icon, size=20),
+            rx.icon(
+                icon, 
+                size=20,
+                width="20px",
+                height="20px",
+                min_width="20px",
+                flex_shrink="0",
+            ),
             rx.cond(
                 is_active,
                 rx.text(
                     text,
                     weight="medium",
                     color=rx.color("iris", 11),
+                    white_space="nowrap",
+                    overflow="hidden",
+                    text_overflow="ellipsis",
+                    flex="1",
+                    min_width="0",
                 ),
                 rx.text(
                     text,
                     weight="regular", 
                     color=rx.color("gray", 11),
+                    white_space="nowrap",
+                    overflow="hidden", 
+                    text_overflow="ellipsis",
+                    flex="1",
+                    min_width="0",
                 ),
             ),
             align="center",
             gap="12px",
-            padding="8px 12px",
+            padding_left=padding_left,
+            padding_right="12px",
+            padding_top="8px",
+            padding_bottom="8px",
             border_radius="6px",
             background=rx.cond(is_active, rx.color("iris", 3), "transparent"),
             _hover={
                 "background": rx.cond(is_active, rx.color("iris", 3), rx.color("iris", 2))
             },
             width="100%",
-            margin_left=margin_left,
+            min_width="0",
+            max_width="100%",
         ),
         href=href,
         text_decoration="none",
         width="100%",
+        min_width="0",
+        max_width="100%",
     )
-def nav_section(title: str, items: list, is_expanded: bool = True) -> rx.Component:
+def nav_section(title: str, items: list, is_expanded: bool = True, on_toggle=None) -> rx.Component:
     """Navigation section with collapsible items."""
     return rx.vstack(
         # Section header
@@ -53,7 +76,11 @@ def nav_section(title: str, items: list, is_expanded: bool = True) -> rx.Compone
                 letter_spacing="0.05em",
             ),
             rx.icon(
-                "chevron-down" if is_expanded else "chevron-right",
+                rx.cond(
+                    is_expanded,
+                    "chevron-down",
+                    "chevron-right",
+                ),
                 size=14,
                 color=rx.color("gray", 10),
             ),
@@ -68,6 +95,7 @@ def nav_section(title: str, items: list, is_expanded: bool = True) -> rx.Compone
                 },
                 "border_radius": "4px",
             },
+            on_click=on_toggle if on_toggle else lambda: None,
         ),
         
         # Section items
@@ -170,6 +198,8 @@ def sidebar() -> rx.Component:
                             nav_item("briefcase", "All Projects", "/projects", NavigationState.current_page == "projects"),
                             projects_nav(),
                         ],
+                        is_expanded=NavigationState.projects_expanded,
+                        on_toggle=NavigationState.toggle_projects_section,
                     ),
                     
                     # Skills section
@@ -179,6 +209,8 @@ def sidebar() -> rx.Component:
                             nav_item("brain", "Overview", "/skills", NavigationState.current_page == "skills"),
                             skills_nav(),
                         ],
+                        is_expanded=NavigationState.skills_expanded,
+                        on_toggle=NavigationState.toggle_skills_section,
                     ),
                     
                     # Blog section
@@ -188,6 +220,8 @@ def sidebar() -> rx.Component:
                             nav_item("book-open", "All Posts", "/blog", NavigationState.current_page == "blog"),
                             blog_nav(),
                         ],
+                        is_expanded=NavigationState.blog_expanded,
+                        on_toggle=NavigationState.toggle_blog_section,
                     ),
                     
                     # Contact
@@ -201,6 +235,9 @@ def sidebar() -> rx.Component:
                 spacing="0",
                 height="100%",
                 overflow_y="auto",
+                overflow_x="hidden",
+                width="100%",
+                max_width="100%",
             ),
             style={
                 **get_sidebar_styles(),
@@ -275,6 +312,7 @@ def mobile_sidebar() -> rx.Component:
                         "border_right": f"1px solid {rx.color('gray', 4)}",
                         "z_index": "1999",
                         "overflow_y": "auto",
+                        "overflow_x": "hidden",
                         "transform": "translateX(0)",
                         "transition": "transform 0.3s ease",
                     },

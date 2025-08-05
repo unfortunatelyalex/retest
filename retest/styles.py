@@ -107,6 +107,7 @@ def get_sidebar_styles():
         "top": "0",
         "z_index": "1000",
         "overflow_y": "auto",
+        "overflow_x": "hidden",
         "transition": "width 0.3s ease",
     }
 

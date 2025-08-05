@@ -18,6 +18,11 @@ class NavigationState(rx.State):
     # Mobile navigation
     mobile_menu_open: bool = False
 
+    # Sidebar section expansion state
+    projects_expanded: bool = True
+    skills_expanded: bool = True
+    blog_expanded: bool = True
+
     # Current page sections for "On this page" navigation
     current_sections: List[Dict[str, str]] = []
 
@@ -28,6 +33,18 @@ class NavigationState(rx.State):
     def toggle_mobile_menu(self):
         """Toggle mobile menu state."""
         self.mobile_menu_open = not self.mobile_menu_open
+
+    def toggle_projects_section(self):
+        """Toggle projects section expansion."""
+        self.projects_expanded = not self.projects_expanded
+
+    def toggle_skills_section(self):
+        """Toggle skills section expansion."""
+        self.skills_expanded = not self.skills_expanded
+
+    def toggle_blog_section(self):
+        """Toggle blog section expansion."""
+        self.blog_expanded = not self.blog_expanded
 
     def set_current_page(self, page: str):
         """Set the current page."""
