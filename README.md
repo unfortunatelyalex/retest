@@ -65,9 +65,7 @@ All API keys are stored in environment variables (obviously).
 
 ## Why Reflex?
 
-Honestly, I was never really a fan of HTML/CSS or JavaScript. My first website can be found [here](https://alexdot.me) but I 
-
-  was tired of dealing with React/Next.js and wanted to try something different. Reflex lets me build the entire frontend and backend in Python, which is pretty neat. Plus, the component system is actually quite nice once you get used to it.
+Honestly, I was never really a fan of HTML/CSS or JavaScript. My first website can be found [here](https://alexdot.me) but I was tired of dealing with JavaScript and wanted to try something different. Reflex lets me build the entire frontend and backend in Python, which is pretty neat. Plus, the component system is actually quite nice once you get used to it.
 
 The state management is straightforward, and I can integrate with any Python library I want for the backend stuff.
 
