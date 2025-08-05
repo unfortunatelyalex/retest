@@ -1,105 +1,152 @@
-# Alex's Portfolio Dashboard
+# Alex's Portfolio Website
 
-Just a personal portfolio site built with Reflex because why not 🤷‍♂️
+A clean, responsive portfolio website built with Reflex because Python is life 🐍
 
 ## What's This?
 
-This is basically my attempt at building a modern portfolio dashboard that actually looks decent. It's an app or website that shows off my portfolio that I've ever dreamed of and connects to various APIs to display real-time data.
+This is my personal portfolio website built entirely in Python using [Reflex](https://reflex.dev). It's a modern, multi-page portfolio that showcases my work, skills, and blog posts. No JavaScript required!
 
-The whole thing is built in Python using [Reflex](https://reflex.dev) - which is pretty cool because I don't have to deal with JS/TS (thank god).
+The site features a responsive design with a collapsible sidebar navigation on desktop and a mobile-friendly layout with hamburger menu on smaller screens.
 
 ## Features
 
-- **Dashboard Layout**: Clean 2x2 grid on desktop and 1x4 on mobile
-- **GitHub Integration**: Shows my actual contribution graph pulled from GitHub's API
-- **Spotify Integration**: Displays what I'm currently listening to (if anything)
-- **Discord Avatar**: Automatically pulls my Discord profile picture from a specific server
-- **Live Clock**: Because why not show the current time
-- **Blog Section**: No posts in this repo, but you can add your own Markdown files in the `public/blog_posts` directory and it will automatically show up
-- **Dark/Light Theme**: System preference support
+- **Responsive Layout**: Beautiful sidebar navigation on desktop, mobile-optimized hamburger menu
+- **Multi-Page Portfolio**: Dedicated pages for About, Projects, Skills, Blog, and Contact
+- **Blog System**: Markdown-based blog posts with automatic parsing and metadata extraction (includes sample posts)
+- **Dark/Light Theme**: Automatic system preference detection with manual toggle
+- **Modern UI**: Clean, professional design using Reflex's built-in components
+- **SEO Friendly**: Proper page titles and meta information
+- **Accessible**: Keyboard navigation and screen reader support
 
 ## Tech Stack
 
-- **Framework**: Reflex (Python web framework)
-- **APIs**: GitHub GraphQL, Spotify Web API, Discord API
-- **Styling**: Built-in Reflex components with custom CSS
-- **Deployment**: TBD (probably on my own server or something)
+- **Framework**: [Reflex](https://reflex.dev) (Python web framework)
+- **Content**: Markdown for blog posts with YAML frontmatter
+- **Styling**: Reflex's built-in theming system with custom styles
+- **State Management**: Reflex's reactive state system
+- **Deployment**: Ready for deployment on any Python hosting platform
 
 ## Project Structure
 
 ```
 retest/
-├── site/
-│   ├── components/        # Individual dashboard widgets
-│   │   ├── github_widget.py
-│   │   ├── spotify_widget.py
-│   │   ├── blog_widget.py
-│   │   └── ...
-│   ├── pages/            # Main pages
-│   │   ├── index.py      # Dashboard page
-│   │   ├── blog.py       # Blog listing
-│   │   └── blog_post.py  # Individual blog posts
-│   └── state.py          # All the state management logic
-├── public/
-│   └── blog_posts/       # Markdown blog posts
-└── assets/               # Static files
+├── retest/                  # Main application directory
+│   ├── components/          # Reusable UI components
+│   │   ├── header.py        # Desktop header with navigation
+│   │   ├── sidebar.py       # Sidebar navigation
+│   │   ├── layout.py        # Main layout wrapper
+│   │   ├── page_nav.py      # Page-specific navigation
+│   │   └── code.py          # Code syntax highlighting
+│   ├── pages/               # Individual pages
+│   │   ├── about.py         # About me page
+│   │   ├── projects.py      # Projects showcase
+│   │   ├── skills.py        # Skills and experience
+│   │   ├── blog.py          # Blog listing page
+│   │   ├── blog_post.py     # Individual blog post viewer
+│   │   └── contact.py       # Contact information
+│   ├── utils/               # Utility functions
+│   │   └── blog.py          # Blog post loading and parsing
+│   ├── public/              # Static content
+│   │   └── blog_posts/      # Markdown blog posts
+│   ├── state.py             # Application state management
+│   ├── styles.py            # Custom styling definitions
+│   └── retest.py            # Main app configuration
+├── assets/                  # Static assets (images, etc.)
+├── requirements.txt         # Python dependencies
+└── rxconfig.py             # Reflex configuration
 ```
 
-## Components
+## Page Components
 
-Each widget is its own component that handles its own state and API calls:
+The site uses a component-based architecture with responsive design patterns:
 
-- **GitHub Widget**: Fetches and displays contribution data in the regular contribution graph style like you see on GitHub
-- **Spotify Widget**: Shows what I'm currently listening to, if anything and displays the album cover
-- **About Section**: Basic info and contact links
-- **Blog Widget**: Preview of latest blog posts
-- **Stats Widget**: Random coding stats (might be fake, might not be)
+- **Layout System**: Automatic sidebar/header on desktop, mobile drawer menu
+- **Navigation**: Hierarchical navigation with section grouping
+- **Content Pages**: Structured with page headers, sections, and responsive grids
+- **Blog System**: Automatic blog post discovery and rendering from Markdown files
+- **Code Blocks**: Syntax highlighting for technical content
 
-## APIs Used
+## Content Management
 
-- **GitHub GraphQL API**: For contribution data and profile info
-- **Spotify Web API**: For current playing track
-- **Discord API**: For profile avatar
-
-All API keys are stored in environment variables (obviously).
+- **Blog Posts**: Write posts in Markdown with YAML frontmatter
+- **Projects**: Manage project data through the portfolio state
+- **Skills**: Organize skills by category (Languages, Frameworks, Tools)
+- **Contact**: Centralized contact information management
 
 ## Why Reflex?
 
-Honestly, I was never really a fan of HTML/CSS or JavaScript. My first website can be found [here](https://alexdot.me) but I 
+After years of wrestling with HTML/CSS hell and JavaScript torture, I discovered Reflex and fell in love with the ability to build modern web applications entirely in Python. The component system is intuitive, the state management is straightforward, and I can leverage the entire Python ecosystem for backend functionality.
 
-  was tired of dealing with React/Next.js and wanted to try something different. Reflex lets me build the entire frontend and backend in Python, which is pretty neat. Plus, the component system is actually quite nice once you get used to it.
-
-The state management is straightforward, and I can integrate with any Python library I want for the backend stuff.
+Plus, as someone who prefers Python's clarity and expressiveness, being able to build both frontend and backend in the same language is incredibly productive.
 
 ## Running Locally
 
-If you want to run this for some reason:
+If you want to check this out locally:
 
-(This assumes you have Python 3.12+ and pip installed)
+**Prerequisites:**
+- Python 3.11+ 
+- pip or pipenv
 
-```bash
-git clone https://github.com/unfortunatelyalex/retest.git
-cd retest
+**Setup:**
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/unfortunatelyalex/retest.git
+   cd retest
+   ```
+
+2. **Create and activate a virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the development server:**
+   ```bash
+   reflex run
+   ```
+
+5. **Open your browser:**
+   Navigate to `http://localhost:3000`
+
+The site will automatically reload when you make changes to the code.
+
+## Adding Content
+
+**Blog Posts:**
+Create new `.md` files in `/retest/public/blog_posts/` with YAML frontmatter:
+
+```markdown
+---
+title: "Your Post Title"
+date: "2025-01-15"
+excerpt: "A brief description of your post"
+tags: ["python", "reflex", "web-development"]
+---
+
+# Your Blog Post
+
+Content goes here...
 ```
 
-Configure your environment variables in `.env.example` and rename it to `.env`.
-```bash
-cp .env.example .env
-```
+**Projects:**
+Update the projects list in `/retest/state.py` in the `PortfolioState` class.
 
-Then set up a virtual environment and install the dependencies:
+**Skills:**
+Modify the skills dictionary in `/retest/state.py` to reflect your expertise.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements.txt
-reflex run
-```
+## Customization
 
-The site should now be running at `http://localhost:3000`.
-
-You'll need to set up your own API keys in a `.env` file, but honestly this is just my personal site so probably not worth it.
+- **Personal Info**: Update contact details and bio in `/retest/state.py`
+- **Styling**: Modify themes and colors in `/retest/styles.py`
+- **Navigation**: Adjust menu items in `/retest/components/sidebar.py`
+- **Layout**: Customize page layouts in `/retest/components/layout.py`
 
 ---
 
-*Built with ☕ and questionable life choices*
+*Built with ❤️ and Python*
