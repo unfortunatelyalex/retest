@@ -9,7 +9,7 @@ config = rx.Config(
     frontend_port=os.getenv("REFLEX_FRONTEND_PORT"),
     backend_port=os.getenv("REFLEX_BACKEND_PORT"),
     loglevel=os.getenv("REFLEX_LOGLEVEL"),
-    show_built_with_reflex=False,
     deploy_url=os.getenv("REFLEX_DEPLOY_URL"),
+    show_built_with_reflex=False,
     plugins=[rx.plugins.TailwindV4Plugin(), rx.plugins.sitemap.SitemapPlugin()],
 )
