@@ -10,5 +10,6 @@ config = rx.Config(
     backend_port=os.getenv("REFLEX_BACKEND_PORT"),
     loglevel=os.getenv("REFLEX_LOGLEVEL"),
     deploy_url="https://retest.alexdot.me",
-    plugins=[rx.plugins.TailwindV4Plugin()],
+    show_built_with_reflex=False,
+    plugins=[rx.plugins.TailwindV4Plugin(), rx.plugins.SitemapPlugin()],
 )
