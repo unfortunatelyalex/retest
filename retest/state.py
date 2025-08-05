@@ -1,8 +1,7 @@
 """State management for the portfolio site."""
 
 import reflex as rx
-from typing import Dict, List, Union
-from typing import List, Dict, Any
+from typing import Dict, List, Union, Any
 from .utils.blog import load_all_blog_posts
 
 
