@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def _to_int(val: str | None, default: int) -> int:
     try:
         return int(val) if val is not None else default

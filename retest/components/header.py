@@ -16,7 +16,7 @@ def theme_toggle() -> rx.Component:
         variant="ghost",
         size="2",
         on_click=rx.toggle_color_mode,
-    aria_label="Toggle color mode",
+        aria_label="Toggle color mode",
         style=get_button_styles("ghost"),
     )
 

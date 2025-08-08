@@ -66,10 +66,10 @@ def nav_item(
             max_width="100%",
         ),
         href=href,
-    text_decoration="none",
+        text_decoration="none",
         width="100%",
         min_width="0",
-    max_width="100%",
+        max_width="100%",
     )
 
 
@@ -158,9 +158,9 @@ def blog_nav() -> rx.Component:
 def skills_nav() -> rx.Component:
     """Skills navigation subsection."""
     return rx.vstack(
-    nav_item("code", "Languages", "/skills#languages", False, indent=1),
-    nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1),
-    nav_item("wrench", "Tools", "/skills#tools", False, indent=1),
+        nav_item("code", "Languages", "/skills#languages", False, indent=1),
+        nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1),
+        nav_item("wrench", "Tools", "/skills#tools", False, indent=1),
         spacing="0",
         width="100%",
     )
