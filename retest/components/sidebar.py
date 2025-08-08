@@ -1,17 +1,20 @@
 """Sidebar navigation component for the portfolio website."""
+
 import reflex as rx
 from ..state import NavigationState, PortfolioState
 from ..styles import get_sidebar_styles, LAYOUT
 
 
-def nav_item(icon: str, text: str, href: str, is_active, indent: int = 0) -> rx.Component:
+def nav_item(
+    icon: str, text: str, href: str, is_active, indent: int = 0
+) -> rx.Component:
     """Create a navigation item for the sidebar."""
     padding_left = f"{12 + (indent * 20)}px" if indent > 0 else "12px"
-    
+
     return rx.link(
         rx.flex(
             rx.icon(
-                icon, 
+                icon,
                 size=20,
                 width="20px",
                 height="20px",
@@ -32,10 +35,10 @@ def nav_item(icon: str, text: str, href: str, is_active, indent: int = 0) -> rx.
                 ),
                 rx.text(
                     text,
-                    weight="regular", 
+                    weight="regular",
                     color=rx.color("gray", 11),
                     white_space="nowrap",
-                    overflow="hidden", 
+                    overflow="hidden",
                     text_overflow="ellipsis",
                     flex="1",
                     min_width="0",
@@ -50,7 +53,9 @@ def nav_item(icon: str, text: str, href: str, is_active, indent: int = 0) -> rx.
             border_radius="6px",
             background=rx.cond(is_active, rx.color("iris", 3), "transparent"),
             _hover={
-                "background": rx.cond(is_active, rx.color("iris", 3), rx.color("iris", 2))
+                "background": rx.cond(
+                    is_active, rx.color("iris", 3), rx.color("iris", 2)
+                )
             },
             width="100%",
             min_width="0",
@@ -62,7 +67,11 @@ def nav_item(icon: str, text: str, href: str, is_active, indent: int = 0) -> rx.
         min_width="0",
         max_width="100%",
     )
-def nav_section(title: str, items: list, is_expanded: bool = True, on_toggle=None) -> rx.Component:
+
+
+def nav_section(
+    title: str, items: list, is_expanded: bool = True, on_toggle=None
+) -> rx.Component:
     """Navigation section with collapsible items."""
     return rx.vstack(
         # Section header
@@ -97,7 +106,6 @@ def nav_section(title: str, items: list, is_expanded: bool = True, on_toggle=Non
             },
             on_click=on_toggle if on_toggle else lambda: None,
         ),
-        
         # Section items
         rx.cond(
             is_expanded,
@@ -108,7 +116,6 @@ def nav_section(title: str, items: list, is_expanded: bool = True, on_toggle=Non
             ),
             rx.fragment(),
         ),
-        
         spacing="1",
         width="100%",
         align="start",
@@ -147,7 +154,7 @@ def skills_nav() -> rx.Component:
     """Skills navigation subsection."""
     return rx.vstack(
         nav_item("code", "Languages", "/skills#languages", False, indent=1),
-        nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1), 
+        nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1),
         nav_item("wrench", "Tools", "/skills#tools", False, indent=1),
         spacing="0",
         width="100%",
@@ -185,53 +192,68 @@ def sidebar() -> rx.Component:
                     padding="2rem 1rem 1.5rem",
                     border_bottom=f"1px solid {rx.color('gray', 4)}",
                 ),
-                
                 # Navigation sections
                 rx.vstack(
                     # Main navigation
-                    nav_item("user", "About Me", "/", NavigationState.current_page == "about"),
-                    
+                    nav_item(
+                        "user", "About Me", "/", NavigationState.current_page == "about"
+                    ),
                     # Projects section
                     nav_section(
                         "Projects",
                         [
-                            nav_item("briefcase", "All Projects", "/projects", NavigationState.current_page == "projects"),
+                            nav_item(
+                                "briefcase",
+                                "All Projects",
+                                "/projects",
+                                NavigationState.current_page == "projects",
+                            ),
                             projects_nav(),
                         ],
                         is_expanded=NavigationState.projects_expanded,
                         on_toggle=NavigationState.toggle_projects_section,
                     ),
-                    
                     # Skills section
                     nav_section(
                         "Skills",
                         [
-                            nav_item("brain", "Overview", "/skills", NavigationState.current_page == "skills"),
+                            nav_item(
+                                "brain",
+                                "Overview",
+                                "/skills",
+                                NavigationState.current_page == "skills",
+                            ),
                             skills_nav(),
                         ],
                         is_expanded=NavigationState.skills_expanded,
                         on_toggle=NavigationState.toggle_skills_section,
                     ),
-                    
                     # Blog section
                     nav_section(
                         "Blog",
                         [
-                            nav_item("book-open", "All Posts", "/blog", NavigationState.current_page == "blog"),
+                            nav_item(
+                                "book-open",
+                                "All Posts",
+                                "/blog",
+                                NavigationState.current_page == "blog",
+                            ),
                             blog_nav(),
                         ],
                         is_expanded=NavigationState.blog_expanded,
                         on_toggle=NavigationState.toggle_blog_section,
                     ),
-                    
                     # Contact
-                    nav_item("mail", "Contact", "/contact", NavigationState.current_page == "contact"),
-                    
+                    nav_item(
+                        "mail",
+                        "Contact",
+                        "/contact",
+                        NavigationState.current_page == "contact",
+                    ),
                     spacing="2",
                     width="100%",
                     padding="1rem",
                 ),
-                
                 spacing="0",
                 height="100%",
                 overflow_y="auto",
@@ -258,7 +280,7 @@ def mobile_sidebar() -> rx.Component:
                     style={
                         "position": "fixed",
                         "top": "0",
-                        "left": "0", 
+                        "left": "0",
                         "width": "100%",
                         "height": "100%",
                         "background_color": "rgba(0, 0, 0, 0.5)",
@@ -266,7 +288,6 @@ def mobile_sidebar() -> rx.Component:
                     },
                     on_click=lambda: NavigationState.toggle_mobile_menu,
                 ),
-                
                 # Sidebar content
                 rx.box(
                     rx.vstack(
@@ -285,19 +306,42 @@ def mobile_sidebar() -> rx.Component:
                             padding="1rem",
                             border_bottom=f"1px solid {rx.color('gray', 4)}",
                         ),
-                        
                         # Navigation items (simplified for mobile)
                         rx.vstack(
-                            nav_item("user", "About", "/", NavigationState.current_page == "about"),
-                            nav_item("briefcase", "Projects", "/projects", NavigationState.current_page == "projects"),
-                            nav_item("brain", "Skills", "/skills", NavigationState.current_page == "skills"),
-                            nav_item("book-open", "Blog", "/blog", NavigationState.current_page == "blog"),
-                            nav_item("mail", "Contact", "/contact", NavigationState.current_page == "contact"),
+                            nav_item(
+                                "user",
+                                "About",
+                                "/",
+                                NavigationState.current_page == "about",
+                            ),
+                            nav_item(
+                                "briefcase",
+                                "Projects",
+                                "/projects",
+                                NavigationState.current_page == "projects",
+                            ),
+                            nav_item(
+                                "brain",
+                                "Skills",
+                                "/skills",
+                                NavigationState.current_page == "skills",
+                            ),
+                            nav_item(
+                                "book-open",
+                                "Blog",
+                                "/blog",
+                                NavigationState.current_page == "blog",
+                            ),
+                            nav_item(
+                                "mail",
+                                "Contact",
+                                "/contact",
+                                NavigationState.current_page == "contact",
+                            ),
                             spacing="1",
                             width="100%",
                             padding="1rem",
                         ),
-                        
                         spacing="0",
                         width="100%",
                         height="100%",

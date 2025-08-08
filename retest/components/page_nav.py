@@ -1,4 +1,5 @@
 """On this page navigation component."""
+
 import reflex as rx
 from ..state import NavigationState
 
@@ -95,7 +96,7 @@ def page_section(
         margin_top="2rem" if level == 2 else "1.5rem",
         margin_bottom="1rem",
     )
-    
+
     return rx.vstack(
         heading_component,
         children,
@@ -113,9 +114,9 @@ def tip_box(content: str, type: str = "info") -> rx.Component:
         "warning": "alert-triangle",
         "error": "alert-circle",
     }
-    
+
     icon = icon_map.get(type, "info")
-    
+
     return rx.box(
         rx.hstack(
             rx.icon(icon, size=18),

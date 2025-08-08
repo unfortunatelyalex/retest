@@ -8,7 +8,7 @@ from .contact import contact_page
 
 __all__ = [
     "about_page",
-    "projects_page", 
+    "projects_page",
     "skills_page",
     "blog_page",
     "contact_page",

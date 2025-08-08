@@ -1,4 +1,5 @@
 """Contact page for the portfolio website."""
+
 import reflex as rx
 from ..components.layout import page_layout, footer
 from ..components.page_nav import page_section, tip_box
@@ -14,7 +15,7 @@ def contact_page() -> rx.Component:
         {"id": "social-media", "title": "Social Media"},
         {"id": "response-time", "title": "Response Time"},
     ]
-    
+
     return page_layout(
         title="Contact",
         description="Let's connect! Reach out for collaborations, opportunities, or just to say hello.",
@@ -35,7 +36,6 @@ def contact_page() -> rx.Component:
                         color=rx.color("gray", 11),
                         line_height="1.6",
                     ),
-                    
                     # Quick contact info
                     rx.grid(
                         # Email
@@ -43,7 +43,9 @@ def contact_page() -> rx.Component:
                             rx.vstack(
                                 rx.hstack(
                                     rx.icon("mail", size=24, color=rx.color("blue", 9)),
-                                    rx.heading("Email", size="4", color=rx.color("blue", 9)),
+                                    rx.heading(
+                                        "Email", size="4", color=rx.color("blue", 9)
+                                    ),
                                     spacing="3",
                                     align="center",
                                 ),
@@ -76,13 +78,18 @@ def contact_page() -> rx.Component:
                             border=f"1px solid {rx.color('blue', 4)}",
                             text_align="center",
                         ),
-                        
                         # Response time
                         rx.box(
                             rx.vstack(
                                 rx.hstack(
-                                    rx.icon("clock", size=24, color=rx.color("green", 9)),
-                                    rx.heading("Response Time", size="4", color=rx.color("green", 9)),
+                                    rx.icon(
+                                        "clock", size=24, color=rx.color("green", 9)
+                                    ),
+                                    rx.heading(
+                                        "Response Time",
+                                        size="4",
+                                        color=rx.color("green", 9),
+                                    ),
                                     spacing="3",
                                     align="center",
                                 ),
@@ -107,23 +114,19 @@ def contact_page() -> rx.Component:
                             border=f"1px solid {rx.color('green', 4)}",
                             text_align="center",
                         ),
-                        
                         columns="1",
                         spacing="4",
                         width="100%",
                     ),
-                    
                     tip_box(
                         "For urgent matters, please mention it in your email subject line.",
-                        type="info"
+                        type="info",
                     ),
-                    
                     spacing="4",
                     align="start",
                     width="100%",
                 ),
             ),
-            
             # Contact form section
             page_section(
                 title="Contact Form",
@@ -135,7 +138,6 @@ def contact_page() -> rx.Component:
                         color=rx.color("gray", 11),
                         line_height="1.6",
                     ),
-                    
                     # Contact form
                     rx.form(
                         rx.vstack(
@@ -169,7 +171,6 @@ def contact_page() -> rx.Component:
                                 spacing="4",
                                 width="100%",
                             ),
-                            
                             # Subject
                             rx.vstack(
                                 rx.text("Subject *", size="2", weight="medium"),
@@ -183,7 +184,6 @@ def contact_page() -> rx.Component:
                                 spacing="1",
                                 width="100%",
                             ),
-                            
                             # Message
                             rx.vstack(
                                 rx.text("Message *", size="2", weight="medium"),
@@ -198,7 +198,6 @@ def contact_page() -> rx.Component:
                                 spacing="1",
                                 width="100%",
                             ),
-                            
                             # Submit button
                             rx.button(
                                 rx.hstack(
@@ -212,21 +211,18 @@ def contact_page() -> rx.Component:
                                 type="submit",
                                 width="fit-content",
                             ),
-                            
                             spacing="4",
                             align="start",
                             width="100%",
                         ),
                         width="100%",
                     ),
-                    
                     spacing="4",
                     align="start",
                     width="100%",
                 ),
             ),
-            
-            # Social media section  
+            # Social media section
             page_section(
                 title="Social Media & Professional Networks",
                 id="social-media",
@@ -237,14 +233,15 @@ def contact_page() -> rx.Component:
                         color=rx.color("gray", 11),
                         line_height="1.6",
                     ),
-                    
                     # Social links
                     rx.grid(
                         # GitHub
                         rx.link(
                             rx.box(
                                 rx.vstack(
-                                    rx.icon("github", size=32, color=rx.color("gray", 12)),
+                                    rx.icon(
+                                        "github", size=32, color=rx.color("gray", 12)
+                                    ),
                                     rx.heading("GitHub", size="4"),
                                     rx.text(
                                         "Check out my code and repositories",
@@ -272,12 +269,13 @@ def contact_page() -> rx.Component:
                             is_external=True,
                             style={"text_decoration": "none"},
                         ),
-                        
                         # LinkedIn
                         rx.link(
                             rx.box(
                                 rx.vstack(
-                                    rx.icon("linkedin", size=32, color=rx.color("blue", 9)),
+                                    rx.icon(
+                                        "linkedin", size=32, color=rx.color("blue", 9)
+                                    ),
                                     rx.heading("LinkedIn", size="4"),
                                     rx.text(
                                         "Professional network and career updates",
@@ -305,12 +303,13 @@ def contact_page() -> rx.Component:
                             is_external=True,
                             style={"text_decoration": "none"},
                         ),
-                        
                         # Twitter/X (optional)
                         rx.link(
                             rx.box(
                                 rx.vstack(
-                                    rx.icon("twitter", size=32, color=rx.color("cyan", 9)),
+                                    rx.icon(
+                                        "twitter", size=32, color=rx.color("cyan", 9)
+                                    ),
                                     rx.heading("Twitter", size="4"),
                                     rx.text(
                                         "Thoughts, updates, and tech discussions",
@@ -338,18 +337,15 @@ def contact_page() -> rx.Component:
                             is_external=True,
                             style={"text_decoration": "none"},
                         ),
-                        
                         columns="1",
                         spacing="4",
                         width="100%",
                     ),
-                    
                     spacing="4",
                     align="start",
                     width="100%",
                 ),
             ),
-            
             # FAQ/Additional info
             rx.box(
                 rx.vstack(
@@ -416,10 +412,8 @@ def contact_page() -> rx.Component:
                 border=f"1px solid {rx.color('gray', 4)}",
                 margin_top="2rem",
             ),
-            
             # Footer
             footer(),
-            
             spacing="6",
             align="start",
             width="100%",

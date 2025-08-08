@@ -33,9 +33,9 @@ def code_block(
             "background_color": rx.color("gray", 2),
             "border": f"1px solid {rx.color('gray', 4)}",
             "border_radius": "0 0 8px 8px" if filename or github_url else "8px",
-            "border_top": "none"
-            if filename or github_url
-            else f"1px solid {rx.color('gray', 4)}",
+            "border_top": (
+                "none" if filename or github_url else f"1px solid {rx.color('gray', 4)}"
+            ),
             "width": "fit-content",
             "min_width": "100%",
         },

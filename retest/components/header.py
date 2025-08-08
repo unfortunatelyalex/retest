@@ -1,4 +1,5 @@
 """Header component for the portfolio website."""
+
 import reflex as rx
 from ..state import NavigationState
 from ..styles import get_header_styles, get_link_styles, get_button_styles
@@ -29,7 +30,6 @@ def header() -> rx.Component:
                     rx.heading("Portfolio", size="4", weight="medium"),
                     spacing="2",
                 ),
-                
                 # Global links - right side
                 rx.hstack(
                     rx.link(
@@ -39,18 +39,18 @@ def header() -> rx.Component:
                             spacing="1",
                             align="center",
                         ),
-                        href="https://github.com/username",
+                        href="https://github.com/unfortunatelyalex",
                         style=get_link_styles(),
                         is_external=True,
                     ),
                     rx.link(
                         rx.hstack(
-                            rx.icon("linkedin", size=18), 
+                            rx.icon("linkedin", size=18),
                             rx.text("LinkedIn", size="2"),
                             spacing="1",
                             align="center",
                         ),
-                        href="https://linkedin.com/in/username",
+                        href="https://linkedin.com/in/alexander-bonin-2758b5178/",
                         style=get_link_styles(),
                         is_external=True,
                     ),
@@ -94,13 +94,10 @@ def mobile_header() -> rx.Component:
                     size="2",
                     style=get_button_styles("ghost"),
                 ),
-                
                 # Logo/Brand
                 rx.heading("Portfolio", size="4", weight="medium"),
-                
                 # Theme toggle
                 theme_toggle(),
-                
                 justify="between",
                 align="center",
                 width="100%",

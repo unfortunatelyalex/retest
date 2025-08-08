@@ -8,7 +8,7 @@ from .code import code_block, inline_code, code_snippet
 
 __all__ = [
     "header",
-    "mobile_header", 
+    "mobile_header",
     "theme_toggle",
     "sidebar",
     "mobile_sidebar",

@@ -1,4 +1,5 @@
 """About Me page for the portfolio website."""
+
 import reflex as rx
 from ..components.layout import page_layout, footer
 from ..components.page_nav import page_section, tip_box
@@ -13,7 +14,7 @@ def about_page() -> rx.Component:
         {"id": "experience", "title": "Experience"},
         {"id": "hobbies", "title": "Hobbies"},
     ]
-    
+
     return page_layout(
         title="About Me",
         description="Get to know me, my background, and what drives my passion for development.",
@@ -58,7 +59,6 @@ def about_page() -> rx.Component:
                 border_radius="12px",
                 border=f"1px solid {rx.color('gray', 4)}",
             ),
-            
             # Background section
             page_section(
                 title="Background",
@@ -87,17 +87,16 @@ def about_page() -> rx.Component:
                     ),
                     tip_box(
                         "I'm always eager to learn new technologies and take on challenging projects that push the boundaries of what's possible.",
-                        type="tip"
+                        type="tip",
                     ),
                     spacing="4",
                     align="start",
                     width="100%",
                 ),
             ),
-            
             # Experience section
             page_section(
-                title="Experience", 
+                title="Experience",
                 id="experience",
                 children=rx.vstack(
                     rx.text(
@@ -106,7 +105,6 @@ def about_page() -> rx.Component:
                         color=rx.color("gray", 11),
                         line_height="1.6",
                     ),
-                    
                     # Experience items
                     rx.vstack(
                         # Experience item 1
@@ -115,7 +113,11 @@ def about_page() -> rx.Component:
                                 rx.hstack(
                                     rx.heading("Senior Software Developer", size="4"),
                                     rx.spacer(),
-                                    rx.text("2022 - Present", size="2", color=rx.color("gray", 10)),
+                                    rx.text(
+                                        "2022 - Present",
+                                        size="2",
+                                        color=rx.color("gray", 10),
+                                    ),
                                     width="100%",
                                     align="center",
                                 ),
@@ -126,10 +128,18 @@ def about_page() -> rx.Component:
                                     weight="medium",
                                 ),
                                 rx.unordered_list(
-                                    rx.list_item("Led development of scalable web applications serving 100k+ users"),
-                                    rx.list_item("Implemented CI/CD pipelines reducing deployment time by 60%"),
-                                    rx.list_item("Mentored junior developers and conducted code reviews"),
-                                    rx.list_item("Architected microservices using Python and Docker"),
+                                    rx.list_item(
+                                        "Led development of scalable web applications serving 100k+ users"
+                                    ),
+                                    rx.list_item(
+                                        "Implemented CI/CD pipelines reducing deployment time by 60%"
+                                    ),
+                                    rx.list_item(
+                                        "Mentored junior developers and conducted code reviews"
+                                    ),
+                                    rx.list_item(
+                                        "Architected microservices using Python and Docker"
+                                    ),
                                 ),
                                 spacing="2",
                                 align="start",
@@ -140,14 +150,17 @@ def about_page() -> rx.Component:
                             border_radius="8px",
                             border=f"1px solid {rx.color('gray', 4)}",
                         ),
-                        
                         # Experience item 2
                         rx.box(
                             rx.vstack(
                                 rx.hstack(
                                     rx.heading("Full Stack Developer", size="4"),
                                     rx.spacer(),
-                                    rx.text("2020 - 2022", size="2", color=rx.color("gray", 10)),
+                                    rx.text(
+                                        "2020 - 2022",
+                                        size="2",
+                                        color=rx.color("gray", 10),
+                                    ),
                                     width="100%",
                                     align="center",
                                 ),
@@ -158,10 +171,18 @@ def about_page() -> rx.Component:
                                     weight="medium",
                                 ),
                                 rx.unordered_list(
-                                    rx.list_item("Built responsive web applications using React and TypeScript"),
-                                    rx.list_item("Developed RESTful APIs with Python FastAPI"),
-                                    rx.list_item("Collaborated with designers to implement pixel-perfect UIs"),
-                                    rx.list_item("Optimized database queries improving performance by 40%"),
+                                    rx.list_item(
+                                        "Built responsive web applications using React and TypeScript"
+                                    ),
+                                    rx.list_item(
+                                        "Developed RESTful APIs with Python FastAPI"
+                                    ),
+                                    rx.list_item(
+                                        "Collaborated with designers to implement pixel-perfect UIs"
+                                    ),
+                                    rx.list_item(
+                                        "Optimized database queries improving performance by 40%"
+                                    ),
                                 ),
                                 spacing="2",
                                 align="start",
@@ -172,26 +193,22 @@ def about_page() -> rx.Component:
                             border_radius="8px",
                             border=f"1px solid {rx.color('gray', 4)}",
                         ),
-                        
                         spacing="3",
                         width="100%",
                     ),
-                    
                     tip_box(
                         "For responsive design, I always consider mobile-first approaches and ensure cross-browser compatibility.",
-                        type="info"
+                        type="info",
                     ),
-                    
                     spacing="4",
                     align="start",
                     width="100%",
                 ),
             ),
-            
             # Hobbies section
             page_section(
                 title="Hobbies",
-                id="hobbies", 
+                id="hobbies",
                 children=rx.vstack(
                     rx.text(
                         "When I'm not coding, I enjoy:",
@@ -200,11 +217,17 @@ def about_page() -> rx.Component:
                         line_height="1.6",
                     ),
                     rx.unordered_list(
-                        rx.list_item("🎸 Playing guitar and exploring different music genres"),
-                        rx.list_item("📚 Reading tech blogs and staying updated with industry trends"),
+                        rx.list_item(
+                            "🎸 Playing guitar and exploring different music genres"
+                        ),
+                        rx.list_item(
+                            "📚 Reading tech blogs and staying updated with industry trends"
+                        ),
                         rx.list_item("🏃‍♂️ Running and maintaining an active lifestyle"),
                         rx.list_item("🎮 Gaming and exploring virtual worlds"),
-                        rx.list_item("📷 Photography, especially landscape and street photography"),
+                        rx.list_item(
+                            "📷 Photography, especially landscape and street photography"
+                        ),
                     ),
                     rx.text(
                         """
@@ -221,7 +244,6 @@ def about_page() -> rx.Component:
                     width="100%",
                 ),
             ),
-            
             # Contact CTA
             rx.box(
                 rx.vstack(
@@ -269,10 +291,8 @@ def about_page() -> rx.Component:
                 text_align="center",
                 margin_top="2rem",
             ),
-            
             # Footer
             footer(),
-            
             spacing="6",
             align="start",
             width="100%",

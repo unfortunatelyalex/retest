@@ -1,4 +1,5 @@
 """Style configuration for the portfolio website."""
+
 import reflex as rx
 
 # Color scheme
@@ -6,7 +7,7 @@ COLORS = {
     # Light mode colors
     "light": {
         "bg_primary": "#ffffff",
-        "bg_secondary": "#f8f9fa", 
+        "bg_secondary": "#f8f9fa",
         "text_primary": "#333333",
         "text_secondary": "#666666",
         "border": "#e5e5e5",
@@ -15,18 +16,18 @@ COLORS = {
         "sidebar_bg": "#fdfdfd",
         "header_bg": "#ffffff",
     },
-    # Dark mode colors  
+    # Dark mode colors
     "dark": {
         "bg_primary": "#0a0a0a",
         "bg_secondary": "#1a1a1a",
-        "text_primary": "#eaeaea", 
+        "text_primary": "#eaeaea",
         "text_secondary": "#b0b0b0",
         "border": "#333333",
         "code_bg": "#2a2a2a",
         "accent": "#007ACC",
         "sidebar_bg": "#111111",
         "header_bg": "#0a0a0a",
-    }
+    },
 }
 
 # Typography
@@ -39,8 +40,8 @@ FONTS = {
 # Breakpoints
 BREAKPOINTS = {
     "mobile": "48em",  # 768px
-    "tablet": "62em",  # 992px  
-    "desktop": "80em", # 1280px
+    "tablet": "62em",  # 992px
+    "desktop": "80em",  # 1280px
 }
 
 # Layout dimensions
@@ -50,6 +51,7 @@ LAYOUT = {
     "header_height": "60px",
     "max_content_width": "1200px",
 }
+
 
 # Common styles
 def get_base_styles():
@@ -61,6 +63,7 @@ def get_base_styles():
         "line_height": "1.6",
     }
 
+
 def get_heading_styles(size: str = "6"):
     """Get heading styles."""
     return {
@@ -70,6 +73,7 @@ def get_heading_styles(size: str = "6"):
         "line_height": "1.2",
         "size": size,
     }
+
 
 def get_code_styles():
     """Get code block styles."""
@@ -84,6 +88,7 @@ def get_code_styles():
         "line_height": "1.5",
     }
 
+
 def get_tip_styles():
     """Get tip/note panel styles."""
     return {
@@ -95,6 +100,7 @@ def get_tip_styles():
         "font_style": "italic",
         "color": rx.color("blue", 11),
     }
+
 
 def get_sidebar_styles():
     """Get sidebar styles."""
@@ -111,8 +117,9 @@ def get_sidebar_styles():
         "transition": "width 0.3s ease",
     }
 
+
 def get_header_styles():
-    """Get header styles.""" 
+    """Get header styles."""
     return {
         "background_color": rx.color("gray", 1),
         "border_bottom": f"1px solid {rx.color('gray', 4)}",
@@ -127,16 +134,18 @@ def get_header_styles():
         "justify_content": "space-between",
     }
 
+
 def get_content_styles():
     """Get main content area styles."""
     return {
         "margin_left": LAYOUT["sidebar_width"],
-        "margin_top": LAYOUT["header_height"], 
+        "margin_top": LAYOUT["header_height"],
         "padding": "2rem",
         "min_height": f"calc(100vh - {LAYOUT['header_height']})",
         "max_width": LAYOUT["max_content_width"],
         "transition": "margin-left 0.3s ease",
     }
+
 
 def get_link_styles():
     """Get link styles."""
@@ -148,6 +157,7 @@ def get_link_styles():
             "text_decoration": "underline",
         },
     }
+
 
 def get_button_styles(variant: str = "solid"):
     """Get button styles."""
