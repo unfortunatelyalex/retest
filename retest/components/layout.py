@@ -68,15 +68,13 @@ def layout(children: rx.Component) -> rx.Component:
 def page_layout(
     title: str,
     children: rx.Component,
-    sections: list = None,
+    sections: list | None = None,
     description: str = "",
 ) -> rx.Component:
     """Page layout with title and optional sections."""
     from .page_nav import on_this_page
 
-    # Set page sections for navigation
-    if sections:
-        NavigationState.set_page_sections(sections)
+    # Note: pages can set sections via state on mount if needed.
 
     return layout(
         rx.vstack(
@@ -100,8 +98,8 @@ def page_layout(
                 ),
                 rx.fragment(),
             ),
-            # On this page navigation
-            on_this_page(),
+            # On this page navigation (desktop only)
+            rx.desktop_only(on_this_page()),
             # Page content
             children,
             spacing="4",

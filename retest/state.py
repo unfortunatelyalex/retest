@@ -1,7 +1,7 @@
 """State management for the portfolio site."""
 
 import reflex as rx
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union
 from .utils.blog import load_all_blog_posts
 
 
@@ -56,9 +56,20 @@ class NavigationState(rx.State):
         self.theme_mode = mode
         # Note: Theme switching will be handled in the frontend component
 
-    def set_page_sections(self, sections: List[Dict[str, str]]):
+    def set_page_sections(self, sections: List[Dict[str, str]] | None = None):
         """Set sections for current page navigation."""
-        self.current_sections = sections
+        self.current_sections = sections or []
+
+    # Convenience: set page and sections when a page is mounted
+    def enter_page(self, page: str, sections: List[Dict[str, str]] | None = None):
+        """Set current page and (optionally) its sections.
+
+        Args:
+            page: simple identifier for active page (e.g., "about", "projects").
+            sections: optional list of section dicts for on-page nav.
+        """
+        self.set_current_page(page)
+        self.set_page_sections(sections)
 
 
 class PortfolioState(rx.State):

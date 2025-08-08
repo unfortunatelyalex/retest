@@ -2,6 +2,7 @@
 
 import reflex as rx
 from ..state import NavigationState
+from ..styles import LAYOUT
 
 
 def on_this_page() -> rx.Component:
@@ -95,6 +96,10 @@ def page_section(
         color=rx.color("gray", 12),
         margin_top="2rem" if level == 2 else "1.5rem",
         margin_bottom="1rem",
+        style={
+            # Prevent anchor being hidden behind fixed header
+            "scroll_margin_top": LAYOUT["header_height"],
+        },
     )
 
     return rx.vstack(

@@ -1,8 +1,8 @@
 """Header component for the portfolio website."""
 
 import reflex as rx
-from ..state import NavigationState
-from ..styles import get_header_styles, get_link_styles, get_button_styles
+from ..state import NavigationState, PortfolioState
+from ..styles import get_header_styles, get_link_styles, get_button_styles, LAYOUT
 
 
 def theme_toggle() -> rx.Component:
@@ -16,6 +16,7 @@ def theme_toggle() -> rx.Component:
         variant="ghost",
         size="2",
         on_click=rx.toggle_color_mode,
+    aria_label="Toggle color mode",
         style=get_button_styles("ghost"),
     )
 
@@ -39,7 +40,7 @@ def header() -> rx.Component:
                             spacing="1",
                             align="center",
                         ),
-                        href="https://github.com/unfortunatelyalex",
+                        href=PortfolioState.github_url,
                         style=get_link_styles(),
                         is_external=True,
                     ),
@@ -50,7 +51,7 @@ def header() -> rx.Component:
                             spacing="1",
                             align="center",
                         ),
-                        href="https://linkedin.com/in/alexander-bonin-2758b5178/",
+                        href=PortfolioState.linkedin_url,
                         style=get_link_styles(),
                         is_external=True,
                     ),
@@ -61,7 +62,7 @@ def header() -> rx.Component:
                             spacing="1",
                             align="center",
                         ),
-                        href="#contact",
+                        href="/contact",
                         style=get_link_styles(),
                     ),
                     theme_toggle(),
@@ -74,8 +75,17 @@ def header() -> rx.Component:
             ),
             style={
                 **get_header_styles(),
-                "left": "280px",  # Account for sidebar width
-                "width": "calc(100% - 280px)",
+                # Account for sidebar width (react to collapsed state)
+                "left": rx.cond(
+                    NavigationState.sidebar_collapsed,
+                    LAYOUT["sidebar_collapsed_width"],
+                    LAYOUT["sidebar_width"],
+                ),
+                "width": rx.cond(
+                    NavigationState.sidebar_collapsed,
+                    "calc(100% - 60px)",
+                    "calc(100% - 280px)",
+                ),
             },
         )
     )
@@ -92,6 +102,7 @@ def mobile_header() -> rx.Component:
                     on_click=lambda: NavigationState.toggle_mobile_menu,
                     variant="ghost",
                     size="2",
+                    aria_label="Open navigation menu",
                     style=get_button_styles("ghost"),
                 ),
                 # Logo/Brand

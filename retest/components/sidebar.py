@@ -6,7 +6,11 @@ from ..styles import get_sidebar_styles, LAYOUT
 
 
 def nav_item(
-    icon: str, text: str, href: str, is_active, indent: int = 0
+    icon: str,
+    text: str,
+    href: str,
+    is_active,
+    indent: int = 0,
 ) -> rx.Component:
     """Create a navigation item for the sidebar."""
     padding_left = f"{12 + (indent * 20)}px" if indent > 0 else "12px"
@@ -62,10 +66,10 @@ def nav_item(
             max_width="100%",
         ),
         href=href,
-        text_decoration="none",
+    text_decoration="none",
         width="100%",
         min_width="0",
-        max_width="100%",
+    max_width="100%",
     )
 
 
@@ -124,13 +128,14 @@ def nav_section(
 
 def projects_nav() -> rx.Component:
     """Projects navigation subsection."""
+    # Until a dynamic project page is implemented, link to /projects
     return rx.foreach(
         PortfolioState.projects,
         lambda project: nav_item(
             "folder",
             project["name"],
-            f"/projects/{project['id']}",
-            NavigationState.current_page == f"projects/{project['id']}",
+            "/projects",
+            NavigationState.current_page == "projects",
             indent=1,
         ),
     )
@@ -153,9 +158,9 @@ def blog_nav() -> rx.Component:
 def skills_nav() -> rx.Component:
     """Skills navigation subsection."""
     return rx.vstack(
-        nav_item("code", "Languages", "/skills#languages", False, indent=1),
-        nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1),
-        nav_item("wrench", "Tools", "/skills#tools", False, indent=1),
+    nav_item("code", "Languages", "/skills#languages", False, indent=1),
+    nav_item("layers", "Frameworks", "/skills#frameworks", False, indent=1),
+    nav_item("wrench", "Tools", "/skills#tools", False, indent=1),
         spacing="0",
         width="100%",
     )
@@ -196,7 +201,10 @@ def sidebar() -> rx.Component:
                 rx.vstack(
                     # Main navigation
                     nav_item(
-                        "user", "About Me", "/", NavigationState.current_page == "about"
+                        "user",
+                        "About Me",
+                        "/",
+                        NavigationState.current_page == "about",
                     ),
                     # Projects section
                     nav_section(
@@ -299,6 +307,7 @@ def mobile_sidebar() -> rx.Component:
                                 on_click=lambda: NavigationState.toggle_mobile_menu,
                                 variant="ghost",
                                 size="2",
+                                aria_label="Close navigation menu",
                             ),
                             justify="between",
                             align="center",

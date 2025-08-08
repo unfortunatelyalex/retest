@@ -15,7 +15,7 @@ def about_page() -> rx.Component:
         {"id": "hobbies", "title": "Hobbies"},
     ]
 
-    return page_layout(
+    content = page_layout(
         title="About Me",
         description="Get to know me, my background, and what drives my passion for development.",
         sections=sections,
@@ -298,3 +298,5 @@ def about_page() -> rx.Component:
             width="100%",
         ),
     )
+    # Note: on_mount state binding can be wired if needed; relying on layout call above.
+    return content
